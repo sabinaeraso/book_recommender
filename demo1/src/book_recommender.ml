@@ -22,6 +22,13 @@ let _get_books_from_subject ~(state : State.t) ~subject =
     then Book.Binary_heap.add to_visit book)
 ;;
 
+(* let%expect_test "Get books from subject" = let state = {State.visited =
+   []; to_visit = Book.Binary_heap.create 200; recommendations = []} in
+   get_books_from_subject ~state ~subject:"tooth_fairy";
+   Book.Binary_heap.iter to_visit
+
+   ;; *)
+
 let _get_next_book ~(state : State.t) =
   let new_book = Book.Binary_heap.pop_minimum state.to_visit in
   state.visited <- List.append state.visited [ Book.key new_book ];
