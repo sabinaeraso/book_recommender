@@ -7,7 +7,7 @@ module Subject = String
 type t =
   { title : Title.t
   ; key : Key.t
-  ; isbn : Isbn.t
+  ; isbn : Isbn.t option
   ; subjects : Subject.t list
   }
 [@@deriving sexp, compare, hash]

@@ -1,7 +1,12 @@
 open! Core
 
-(* module State = struct type t = { visited : Hashtbl.M(Book).t ; to_visit :
-   Hashtbl.M(Book).t ; recommendations : Hashtbl.M(Book).t } end *)
+module State = struct
+  type t =
+    { visited : int (* some mutable set of books*)
+    ; to_visit : Binary_heap.Ordered.t
+    ; recommendations : Hashtbl.M(Book).t
+    }
+end
 
 let visited = Hashtbl.create (module Int)
 let to_visit = Hashtbl.create (module Book)
