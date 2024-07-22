@@ -11,3 +11,5 @@ end
 module Search_page : sig
   val parse_searches : string -> Book.t
 end
+
+val command : Command.t

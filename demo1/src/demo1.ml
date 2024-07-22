@@ -2,6 +2,7 @@ open! Core
 
 let command =
   Command.group
-    ~summary:"A tool for playing the wikipedia game, and other utilities"
-    [ "fetch", Book_fetch.command ]
+    ~summary:
+      "Allows you to fetch raw data, and parsed data from Open Library"
+    [ "fetch", Book_fetch.command; "parse", Page_parser.command ]
 ;;

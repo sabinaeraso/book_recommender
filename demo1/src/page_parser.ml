@@ -129,3 +129,38 @@ module Search_page = struct
     get_most_relevant_book (parse_from_string raw_page)
   ;;
 end
+
+let fetch_books_by_subject =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:
+      "Given a subject, Ex. 'love' will return all books with that subject"
+    [%map_open
+      let subject =
+        flag "subject" (required string) ~doc:"the subject name"
+      in
+      fun () ->
+        let fetched_file = Book_fetch.Fetcher.Subjects.fetch_sub subject in
+        print_s [%sexp (Subject_page.parse_books fetched_file : Book.t list)]]
+;;
+
+let find_book_by_name =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:"Given a book name, tries to find it"
+    [%map_open
+      let name = flag "name" (required string) ~doc:"The book name" in
+      fun () ->
+        let fetched_file =
+          Book_fetch.Fetcher.Search_by_name.fetch_from_search name
+        in
+        print_s [%sexp (Search_page.parse_searches fetched_file : Book.t)]]
+;;
+
+let command =
+  Command.group
+    ~summary:"Parse Open Library Data"
+    [ "books-from-subject", fetch_books_by_subject
+    ; "book-from-name", find_book_by_name
+    ]
+;;
