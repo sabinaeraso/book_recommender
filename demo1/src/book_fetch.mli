@@ -9,6 +9,10 @@ module Fetcher : sig
     val fetch_key : string -> string
     val fetch_olid : string -> string
   end
+
+  module Search_by_name : sig
+    val fetch_from_search : string -> string
+  end
 end
 
 val command : Command.t

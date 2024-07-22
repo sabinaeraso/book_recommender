@@ -37,6 +37,22 @@ module Fetcher = struct
       File_fetcher.fetch_exn Remote ~resource:(create_search_with_OLID olid)
     ;;
   end
+
+  module Search_by_name = struct
+    let format_name (name : string) =
+      String.strip name
+      |> String.split_on_chars ~on:[ ' ' ]
+      |> String.concat ~sep:"%20"
+    ;;
+
+    let create_search_url (name : string) =
+      prefix ^ "/search.json?q=" ^ format_name name
+    ;;
+
+    let fetch_from_search name =
+      File_fetcher.fetch_exn Remote ~resource:(create_search_url name)
+    ;;
+  end
 end
 
 let fetch_sub_command =
@@ -69,11 +85,22 @@ let fetch_key_command =
 let fetch_olid_command =
   let open Command.Let_syntax in
   Command.basic
-    ~summary:"given an olid. in for 'OL....' will return book info"
+    ~summary:"given an olid. in format 'OL....' will return book info"
     [%map_open
       let olid = flag "olid" (required string) ~doc:"the OLID of the book" in
       fun () ->
         let fetched_file = Fetcher.Books.fetch_olid olid in
+        print_endline fetched_file]
+;;
+
+let search_book_command =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:"Given a book name, tries to find it"
+    [%map_open
+      let name = flag "name" (required string) ~doc:"The book name" in
+      fun () ->
+        let fetched_file = Fetcher.Search_by_name.fetch_from_search name in
         print_endline fetched_file]
 ;;
 
@@ -83,5 +110,6 @@ let command =
     [ "subject-fetch", fetch_sub_command
     ; "book-fetch-by-key", fetch_key_command
     ; "book-fetch-by-olid", fetch_olid_command
+    ; "search-book-name", search_book_command
     ]
 ;;
