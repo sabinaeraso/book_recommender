@@ -1,19 +1,19 @@
 open! Core
 
 module Isbn : sig
-  type t = int
+  type t = int [@@deriving sexp, compare, hash]
 end
 
 module Title : sig
-  type t = String
+  type t = String [@@deriving sexp, compare, hash]
 end
 
 module Key : sig
-  type t = String
+  type t = String [@@deriving sexp, compare, hash]
 end
 
 module Subject : sig
-  type t = String
+  type t = String [@@deriving sexp, compare, hash]
 end
 
 type t =
@@ -24,7 +24,13 @@ type t =
   }
 [@@deriving sexp, compare, hash]
 
-val create : string -> string -> int -> string -> t
+val create
+  :  title:string
+  -> key:string
+  -> isbn:int option
+  -> subjects:string
+  -> t
+
 val to_string : t -> string
 val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list

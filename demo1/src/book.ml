@@ -1,8 +1,8 @@
 open! Core
-module Isbn = Int
-module Key = String
-module Title = String
-module Subject = String
+module Isbn = Int [@@deriving sexp, compare, hash]
+module Key = String [@@deriving sexp, compare, hash]
+module Title = String [@@deriving sexp, compare, hash]
+module Subject = String [@@deriving sexp, compare, hash]
 
 type t =
   { title : Title.t
