@@ -1,24 +1,27 @@
 open! Core
-
-(* information: title, id , subjects *)
-
-module Id = Int
+module Isbn = Int
+module Key = String
 module Title = String
 module Subject = String
 
 type t =
   { title : Title.t
-  ; id : Id.t
+  ; key : Key.t
+  ; isbn : Isbn.t
   ; subjects : Subject.t list
   }
 [@@deriving sexp, compare, hash]
 
-let to_string { title; id; _ } =
-  Core.sprintf !{|Title: %{sexp:Title.t}
-Id: %{sexp:Id.t}
-|} title id
+let to_string book =
+  Core.sprintf
+    !{|Title: %{sexp:Title.t}
+Key: %{sexp:Key.t}
+|}
+    book.title
+    book.key
 ;;
 
 let subjects t = t.subjects
-let id t = t.id
+let key t = t.key
+let isbn t = t.isbn
 let title t = t.title
