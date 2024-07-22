@@ -9,6 +9,7 @@ type t =
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
+  ; heuristic : int
   }
 [@@deriving sexp, compare, hash]
 
@@ -21,8 +22,24 @@ Key: %{sexp:Key.t}
     book.key
 ;;
 
-let create ~title ~key ~subjects ~isbn = { title; key; subjects; isbn }
+let create ~title ~key ~subjects ~isbn ~heuristic =
+  { title; key; subjects; isbn; heuristic }
+;;
+
+let compare_by_heuristic =
+  Comparable.lift Int.compare ~f:(fun book -> book.heuristic)
+;;
+
 let subjects t = t.subjects
 let key t = t.key
 let isbn t = t.isbn
 let title t = t.title
+let heuristic t = t.heuristic
+
+module T = struct
+  type nonrec t = t
+
+  let compare = compare_by_heuristic
+end
+
+module Binary_heap = Binary_heap.Make (T)
