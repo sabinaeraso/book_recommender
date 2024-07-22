@@ -3,6 +3,6 @@
   (deps
    (source_tree ../resources)))
  (name demo1)
- (libraries core curl file_path ocamlgraph lambdasoup uri)
+ (libraries core curl file_path ocamlgraph lambdasoup uri yojson)
  (preprocess
   (pps ppx_jane ppx_inline_test)))
