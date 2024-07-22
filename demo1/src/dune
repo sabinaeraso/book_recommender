@@ -1,0 +1,8 @@
+(library
+ (inline_tests
+  (deps
+   (source_tree ../resources)))
+ (name demo1)
+ (libraries core curl file_path ocamlgraph lambdasoup uri)
+ (preprocess
+  (pps ppx_jane ppx_inline_test)))
