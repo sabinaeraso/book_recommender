@@ -16,7 +16,13 @@ module Subject : sig
   type t = String
 end
 
-type t [@@deriving sexp, compare, hash]
+type t =
+  { title : Title.t
+  ; key : Key.t
+  ; isbn : Isbn.t option
+  ; subjects : Subject.t list
+  }
+[@@deriving sexp, compare, hash]
 
 val to_string : t -> string
 val isbn : t -> Isbn.t option

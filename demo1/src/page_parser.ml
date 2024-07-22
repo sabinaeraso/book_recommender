@@ -26,12 +26,12 @@ module Subject_page = struct
           if String.equal name "subject" then Some subject else None)
       in
       { Book.title = Yojson.to_string title
-      ; key = Yojson.to_string title
+      ; key = Yojson.to_string key
       ; isbn =
           (match isbn with
            | None -> None
            | Some num -> Int.of_string (Yojson.to_string num))
-      ; subjects
+      ; subjectsgit
       }
     | _ -> ()
   ;;
