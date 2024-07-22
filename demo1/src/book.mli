@@ -24,6 +24,7 @@ type t =
   }
 [@@deriving sexp, compare, hash]
 
+val create : string -> string -> int -> string -> t
 val to_string : t -> string
 val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list
