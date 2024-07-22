@@ -1,7 +1,7 @@
 open! Core
 
 module type Ordered = sig
-  type t
+  type t [@@deriving sexp]
 
   val compare : t -> t -> int
 end
