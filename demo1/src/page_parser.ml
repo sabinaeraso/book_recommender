@@ -32,25 +32,39 @@ module Subject_page = struct
           (List.find_map_exn fields ~f:(fun (name, subject) ->
              if String.equal name "subject" then Some subject else None))
       in
-      { Book.title = Yojson.to_string title
-      ; key = Yojson.to_string key
-      ; isbn =
+      Book.create
+        ~title:(Yojson.Safe.to_string title)
+        ~key:(Yojson.Safe.to_string key)
+        ~isbn:
           (match isbn with
            | None -> None
            | Some num -> Some (Int.of_string (Yojson.Safe.to_string num)))
-      ; subjects
-      }
+        ~subjects
     | _ -> failwith "Was not properly formatted"
+  ;;
+
+  let make_book_list (works_list : Yojson.Safe.t) =
+    match works_list with
+    | `List all_works -> List.map all_works ~f:make_book_from_json
+    | _ -> failwith "Works not properly formatted"
   ;;
 
   let get_works_list (json_page : Yojson.Safe.t) =
     match json_page with
     | `Assoc top_level ->
-      let _works =
-        List.find top_level ~f:(fun (name, _elt) ->
-          String.equal name "works")
+      let works =
+        List.find_map top_level ~f:(fun (name, work) ->
+          if String.equal name "works" then Some work else None)
       in
-      ()
+      (match works with
+       | None -> failwith "There was no works field"
+       | Some work -> make_book_list work)
     | _ -> failwith "Not a valid formatted page"
   ;;
+
+  let parse_books (raw_page : string) =
+    get_works_list (parse_from_string raw_page)
+  ;;
 end
+
+module Book_page = struct end
