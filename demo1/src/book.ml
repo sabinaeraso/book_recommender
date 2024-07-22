@@ -21,6 +21,7 @@ Key: %{sexp:Key.t}
     book.key
 ;;
 
+let create ~title ~key ~subjects ~isbn = { title; key; subjects; isbn }
 let subjects t = t.subjects
 let key t = t.key
 let isbn t = t.isbn
