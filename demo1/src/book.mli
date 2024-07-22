@@ -5,15 +5,15 @@ module Isbn : sig
 end
 
 module Title : sig
-  type t = String [@@deriving sexp, compare, hash]
+  type t = string [@@deriving sexp, compare, hash]
 end
 
 module Key : sig
-  type t = String [@@deriving sexp, compare, hash]
+  type t = string [@@deriving sexp, compare, hash]
 end
 
 module Subject : sig
-  type t = String [@@deriving sexp, compare, hash]
+  type t = string [@@deriving sexp, compare, hash]
 end
 
 type t =
@@ -27,8 +27,8 @@ type t =
 val create
   :  title:string
   -> key:string
+  -> subjects:string list
   -> isbn:int option
-  -> subjects:string
   -> t
 
 val to_string : t -> string
@@ -36,3 +36,5 @@ val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list
 val key : t -> Key.t
 val title : t -> Title.t
+
+module Binary_heap : Binary_heap.S with type Value.t = t

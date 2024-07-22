@@ -1,7 +1,7 @@
 open! Core
 
 module type Ordered = sig
-  type t
+  type t [@@deriving sexp]
 
   val compare : t -> t -> int
 end
@@ -12,6 +12,7 @@ module Make (X : Ordered) = struct
   (* The heap is encoded in the array [data], where elements are stored from
      [0] to [size - 1]. From an element stored at [i], the left (resp. right)
      subtree, if any, is rooted at [2*i+1] (resp. [2*i+2]). *)
+  module Value = X
 
   type t =
     { mutable size : int
@@ -19,6 +20,7 @@ module Make (X : Ordered) = struct
     ; dummy : X.t
     ; min_cap : int (* minimal capacity, as given initially *)
     }
+  [@@deriving sexp]
   (* invariant 0 <= size <= length data *)
   (* invariant data[size..] only contains dummy *)
 
