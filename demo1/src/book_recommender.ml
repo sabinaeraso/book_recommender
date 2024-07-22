@@ -2,22 +2,28 @@ open! Core
 
 module State = struct
   type t =
-    { visited : int (* some mutable set of books*)
-    ; to_visit : Binary_heap.Ordered.t
+    { mutable visited : Book.Key.t list
+         [@hash.ignore] (* some mutable set of books*)
+    ; mutable to_visit : Binary_heap.Ordered.t [@hash.ignore]
     ; recommendations : Hashtbl.M(Book).t
     }
+  [@@deriving compare, hash]
+
+  let visited t = t.visited
+  let to_visit t = t.to_visit
+  let recommendations t = t.recommendations
 end
 
-let visited = Hashtbl.create (module Int)
-let to_visit = Hashtbl.create (module Book)
-let recommendations = Hashtbl.create (module Book)
-
-let get_books_from_subject ~subject =
-  let books = [] in
-  (* file fetch subject to get list of books*)
+let get_books_from_subject ~(state : State.t) ~subject =
+  let visited = State.visited state in
+  let to_visit = State.to_visit state in
+  let recommendations = State.recommendations state in
+  let books_raw = Fetcher.Subjects.fetch_sub subject in
+  let books = Page_parser.Subject_page.get_works_list books_raw in
   List.iter books ~f:(fun (book : Book.t) ->
-    let isbn = Book.isbn book in
-    if not (Hashtbl.mem visited isbn)
+    let key = Book.key book in
+    if not
+         (List.exists visited ~f:(fun k -> equal 0 (Book.Key.compare k key)))
     then (
       match Hashtbl.add to_visit ~key:book ~data:0 with
       | `Ok -> Hashtbl.add_exn to_visit ~key:book ~data:1
