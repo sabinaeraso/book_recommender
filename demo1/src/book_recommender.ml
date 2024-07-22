@@ -22,7 +22,7 @@ let get_books_from_subject ~(state : State.t) ~subject =
     then Book.Binary_heap.add to_visit book)
 ;;
 
-let get_next_book ~visited ~to_visit ~recommendations =
-  let new_book = Hashtbl.choose_randomly to_visit in
+let get_next_book ~_visited ~to_visit ~_recommendations =
+  let _new_book = Hashtbl.choose_randomly to_visit in
   ()
 ;;
