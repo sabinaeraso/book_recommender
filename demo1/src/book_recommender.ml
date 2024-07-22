@@ -3,14 +3,14 @@ open! Core
 module State = struct
   type t =
     { mutable visited : Book.Key.t list
-    ; mutable to_visit : Book.Binary_heap.t
+    ; to_visit : Book.Binary_heap.t
     ; recommendations : Book.t list
     }
   [@@deriving sexp_of]
 end
 
 (* user said yes to X book, so now we call this on all tis subjects : *)
-let get_books_from_subject ~(state : State.t) ~subject =
+let _get_books_from_subject ~(state : State.t) ~subject =
   let visited = state.visited in
   let to_visit = state.to_visit in
   let books_raw = Book_fetch.Fetcher.Subjects.fetch_sub subject in
@@ -22,7 +22,8 @@ let get_books_from_subject ~(state : State.t) ~subject =
     then Book.Binary_heap.add to_visit book)
 ;;
 
-let get_next_book ~_visited ~to_visit ~_recommendations =
-  let _new_book = Hashtbl.choose_randomly to_visit in
-  ()
+let _get_next_book ~(state : State.t) =
+  let new_book = Book.Binary_heap.pop_minimum state.to_visit in
+  state.visited <- List.append state.visited [ Book.key new_book ];
+  new_book
 ;;

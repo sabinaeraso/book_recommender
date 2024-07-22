@@ -21,6 +21,7 @@ type t =
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
+  ; heuristic : int
   }
 [@@deriving sexp, compare, hash]
 
@@ -29,6 +30,7 @@ val create
   -> key:string
   -> subjects:string list
   -> isbn:int option
+  -> heuristic:int
   -> t
 
 val to_string : t -> string
@@ -36,5 +38,6 @@ val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list
 val key : t -> Key.t
 val title : t -> Title.t
+val heuristic : t -> int
 
 module Binary_heap : Binary_heap.S with type Value.t = t
