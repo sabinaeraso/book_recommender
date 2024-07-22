@@ -3,6 +3,12 @@ open! Core
 let parse_from_string (page : string) = Yojson.Safe.from_string page
 
 module Subject_page = struct
+  let make_subject_list_from_json (json_list : Yojson.Safe.t) =
+    match json_list with
+    | `List subjects -> List.map subjects ~f:Yojson.Safe.to_string
+    | _ -> failwith "Subjects not properly formatted"
+  ;;
+
   let make_book_from_json (book_info : Yojson.Safe.t) =
     match book_info with
     | `Assoc fields ->
@@ -22,18 +28,19 @@ module Subject_page = struct
           else None)
       in
       let subjects =
-        List.find_map fields ~f:(fun (name, subject) ->
-          if String.equal name "subject" then Some subject else None)
+        make_subject_list_from_json
+          (List.find_map_exn fields ~f:(fun (name, subject) ->
+             if String.equal name "subject" then Some subject else None))
       in
       { Book.title = Yojson.to_string title
       ; key = Yojson.to_string key
       ; isbn =
           (match isbn with
            | None -> None
-           | Some num -> Int.of_string (Yojson.to_string num))
-      ; subjectsgit
+           | Some num -> Some (Int.of_string (Yojson.Safe.to_string num)))
+      ; subjects
       }
-    | _ -> ()
+    | _ -> failwith "Was not properly formatted"
   ;;
 
   let get_works_list (json_page : Yojson.Safe.t) =
