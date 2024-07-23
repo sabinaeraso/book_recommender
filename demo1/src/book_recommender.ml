@@ -5,6 +5,7 @@ module State = struct
     { mutable visited : Book.Key.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
+    ; mutable current_book : Book.t
     }
   [@@deriving sexp_of]
 end
@@ -31,6 +32,7 @@ let%expect_test "Get books from subject: Tooth Fairy" =
     { State.visited = []
     ; to_visit = Book.Binary_heap.create ~dummy 1
     ; recommendations = []
+    ; current_book = dummy
     }
   in
   update_to_visit_from_subject ~state ~subject:"tooth_fairy";
@@ -51,6 +53,7 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
     { State.visited = []
     ; to_visit = Book.Binary_heap.create ~dummy 1
     ; recommendations = []
+    ; current_book = dummy
     }
   in
   update_to_visit_from_subject ~state ~subject:"tooth_fairy";
