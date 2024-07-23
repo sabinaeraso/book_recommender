@@ -20,11 +20,11 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
         if String.equal name "title" then Some title else None)
     in
     let isbn =
-      List.find_map fields ~f:(fun (name, isbn) ->
-        if String.equal name "isbn"
-           && not (String.equal (Yojson.Safe.to_string isbn) "null")
-        then Some isbn
-        else None)
+      None
+      (* List.find_map fields ~f:(fun (name, isbn) -> if String.equal name
+         "isbn" && not (String.equal (Yojson.Safe.to_string isbn) "null")
+         then ( match isbn with | `List isbns -> Some (List.hd_exn isbns) | _
+         -> Some isbn) else None) *)
     in
     let subjects =
       make_subject_list_from_json
@@ -81,11 +81,10 @@ module Book_page = struct
           if String.equal name "title" then Some title else None)
       in
       let isbn =
-        List.find_map fields ~f:(fun (name, isbn) ->
-          if String.equal name "isbn"
-             && not (String.equal (Yojson.Safe.to_string isbn) "null")
-          then Some isbn
-          else None)
+        None
+        (* List.find_map fields ~f:(fun (name, isbn) -> if String.equal name
+           "isbn" && not (String.equal (Yojson.Safe.to_string isbn) "null")
+           then Some isbn else None) *)
       in
       let subjects =
         make_subject_list_from_json
