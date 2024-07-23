@@ -17,26 +17,33 @@ let every (seconds : float) ~f ~stop =
 ;;
 
 let response_options =
-  Fzf.Pick_from.inputs
-    [ "Interested"
-    ; "Uninterested"
-    ; "Already Read; Didn't Like"
-    ; "Already Read; Did Like"
-    ; "Done"
-    ]
+  Fzf.Pick_from.assoc
+    (List.zip_exn
+       [ "Interested"
+       ; "Uninterested"
+       ; "Read and Liked"
+       ; "Read did not like"
+       ; "Done"
+       ]
+       Message.all)
 ;;
 
 let get_user_response () =
-  let open Option.Let_syntax in 
-   let%bind response = (Fzf.pick_one response_options) in 
-    match (ok_exn response) with 
-    | 
-  ;;
+  let open Deferred.Let_syntax in
+  let%map response = Fzf.pick_one response_options in
+  match ok_exn response with
+  | None -> failwith "Did not select one of the options"
+  | Some message -> message
+;;
 
-let rec run_recommender (state:Book_recommender.State.t) =
-let response = get_user_response () in 
-match response with 
-|  -> 
+let rec run_recommender (state : Book_recommender.State.t) =
+  let%map response = get_user_response () in
+  match response with
+  | Message.Interested -> ()
+  | Not_Interested -> ()
+  | Read_liked -> ()
+  | Read_didnt_like -> ()
+  | Done -> ()
 ;;
 
 let run () =
@@ -48,5 +55,5 @@ let origin_book =
 in
 let state = Book_recommender.State.empty_state in
 state.current_book <- origin_book;
-Handle._handle_yes ~state; run_recommender state
-;;
+Handle._handle_yes ~state;
+run_recommender state

@@ -6,4 +6,4 @@ type t =
   | Read_liked
   | Read_didnt_like
   | Done
-[@@deriving sexp_of]
+[@@deriving sexp_of, enumerate]
