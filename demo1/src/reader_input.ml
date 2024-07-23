@@ -25,4 +25,7 @@ let response_options =
 ;;
 
 let get_user_response = Fzf.pick_one response_options
-let start_game = print_string "Please input the name of your favorite book! "
+
+(* let start_game = print_string "Please input the name of your favorite
+   book! " in let origin_book = Page_parser.Book_page.parse_book
+   (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W") in let state = *)
