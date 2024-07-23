@@ -54,14 +54,16 @@ let rec run_recommender (state : Book_recommender.State.t) =
 ;;
 
 let run () =
-  print_string "Please input the name of your favorite\n   book! ";
+  Core.print_string "Please input the name of your favorite book! ";
   let origin_book =
     Page_parser.Book_page.parse_book
       (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W")
   in
   let state = Book_recommender.State.empty_state in
   state.current_book <- origin_book;
+  print_s [%sexp (origin_book : Book.t)];
   Handle.handle_yes ~state;
+  print_s [%sexp (state : Book_recommender.State.t)];
   run_recommender state
 ;;
 

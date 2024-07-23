@@ -7,12 +7,13 @@ module Fetcher = struct
   let format_name (name : string) =
     String.strip name
     |> String.split_on_chars ~on:[ ' ' ]
-    |> String.concat ~sep:"%20"
+    |> String.concat ~sep:"_"
+    |> String.lowercase
   ;;
 
   module Subjects = struct
     let create_subject_search_url (subject : string) =
-      prefix ^ "/subjects/" ^ format_name subject ^ suffix
+      prefix ^ "subjects/" ^ format_name subject ^ suffix
     ;;
 
     let add_limit (curr_url : string) (limit : int) =
@@ -20,11 +21,15 @@ module Fetcher = struct
     ;;
 
     let fetch_sub ?limit (subject : string) =
+      print_endline (format_name subject);
+      print_endline (create_subject_search_url subject);
       let start = create_subject_search_url subject in
       let url =
         match limit with None -> start | Some lim -> add_limit start lim
       in
-      File_fetcher.fetch_exn Remote ~resource:url
+      let result = File_fetcher.fetch_exn Remote ~resource:url in
+      (* print_endline result; *)
+      result
     ;;
   end
 
@@ -32,7 +37,7 @@ module Fetcher = struct
     let create_book_search_url (key : string) = prefix ^ key ^ suffix
 
     let create_search_with_OLID (olid : string) =
-      prefix ^ "/works/" ^ olid ^ suffix
+      prefix ^ "works/" ^ olid ^ suffix
     ;;
 
     let fetch_key key =
