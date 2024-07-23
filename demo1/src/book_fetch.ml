@@ -4,9 +4,15 @@ module Fetcher = struct
   let prefix = "https://openlibrary.org/"
   let suffix = ".json"
 
+  let format_name (name : string) =
+    String.strip name
+    |> String.split_on_chars ~on:[ ' ' ]
+    |> String.concat ~sep:"%20"
+  ;;
+
   module Subjects = struct
     let create_subject_search_url (subject : string) =
-      prefix ^ "/subjects/" ^ subject ^ suffix
+      prefix ^ "/subjects/" ^ format_name subject ^ suffix
     ;;
 
     let add_limit (curr_url : string) (limit : int) =
@@ -39,12 +45,6 @@ module Fetcher = struct
   end
 
   module Search_by_name = struct
-    let format_name (name : string) =
-      String.strip name
-      |> String.split_on_chars ~on:[ ' ' ]
-      |> String.concat ~sep:"%20"
-    ;;
-
     let create_search_url (name : string) =
       prefix ^ "/search.json?q=" ^ format_name name
     ;;

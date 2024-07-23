@@ -64,3 +64,20 @@ let run () =
   Handle.handle_yes ~state;
   run_recommender state
 ;;
+
+let run_command =
+  let open Command.Let_syntax in
+  Async_command.async
+    ~summary:"Run the book recommender!"
+    [%map_open
+      let _subject =
+        flag "subject" (optional string) ~doc:"the subject name"
+      in
+      fun () -> run ()]
+;;
+
+let command =
+  Command.group
+    ~summary:"Use to run the book recommender"
+    [ "Recommend", run_command ]
+;;
