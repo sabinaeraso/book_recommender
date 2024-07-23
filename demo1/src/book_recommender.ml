@@ -8,6 +8,20 @@ module State = struct
     ; mutable current_book : Book.t
     }
   [@@deriving sexp_of]
+
+  let empty_state =
+    let dummy =
+      Book.create ~title:"Dummy" ~key:"Key" ~subjects:[] ~isbn:(Some 1)
+    in
+    let state =
+      { visited = []
+      ; to_visit = Book.Binary_heap.create ~dummy 1
+      ; recommendations = []
+      ; current_book = dummy
+      }
+    in
+    state
+  ;;
 end
 
 (* user said yes to X book, so now we call this on all tis subjects : *)
@@ -25,16 +39,7 @@ let update_to_visit_from_subject ~(state : State.t) ~subject =
 ;;
 
 let%expect_test "Get books from subject: Tooth Fairy" =
-  let dummy =
-    Book.create ~title:"Dummy" ~key:"Key" ~subjects:[] ~isbn:(Some 1)
-  in
-  let state =
-    { State.visited = []
-    ; to_visit = Book.Binary_heap.create ~dummy 1
-    ; recommendations = []
-    ; current_book = dummy
-    }
-  in
+  let state = State.empty_state in
   update_to_visit_from_subject ~state ~subject:"tooth_fairy";
   Book.Binary_heap.iter (fun book -> Book.print book) state.to_visit
 ;;
@@ -46,16 +51,7 @@ let get_next_book ~(state : State.t) =
 ;;
 
 let%expect_test "Get next book from Tooth Fairy subject original queue" =
-  let dummy =
-    Book.create ~title:"Dummy" ~key:"Key" ~subjects:[] ~isbn:(Some 1)
-  in
-  let state =
-    { State.visited = []
-    ; to_visit = Book.Binary_heap.create ~dummy 1
-    ; recommendations = []
-    ; current_book = dummy
-    }
-  in
+  let state = State.empty_state in
   update_to_visit_from_subject ~state ~subject:"tooth_fairy";
   let next_book = get_next_book ~state in
   Book.print next_book
