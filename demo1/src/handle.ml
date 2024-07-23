@@ -1,6 +1,6 @@
 open! Core
 
-let _handle_yes ~(state : Book_recommender.State.t) =
+let handle_yes ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited <- List.append state.visited [ book.key ];
   state.recommendations <- List.append state.recommendations [ book ];
@@ -12,7 +12,7 @@ let _handle_yes ~(state : Book_recommender.State.t) =
   Book.print next_book
 ;;
 
-let _handle_no ~(state : Book_recommender.State.t) =
+let handle_no ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited <- List.append state.visited [ book.key ];
   let next_book = Book_recommender.get_next_book ~state in
@@ -20,7 +20,7 @@ let _handle_no ~(state : Book_recommender.State.t) =
   Book.print next_book
 ;;
 
-let _handle_read_yes ~(state : Book_recommender.State.t) =
+let handle_read_yes ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited <- List.append state.visited [ book.key ];
   let subjects = book.subjects in
@@ -31,7 +31,7 @@ let _handle_read_yes ~(state : Book_recommender.State.t) =
   Book.print next_book
 ;;
 
-let _handle_read_no ~(state : Book_recommender.State.t) =
+let handle_read_no ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited <- List.append state.visited [ book.key ];
   let next_book = Book_recommender.get_next_book ~state in
@@ -39,7 +39,7 @@ let _handle_read_no ~(state : Book_recommender.State.t) =
   Book.print next_book
 ;;
 
-let _handle_done ~(state : Book_recommender.State.t) =
+let handle_done ~(state : Book_recommender.State.t) =
   let recs = state.recommendations in
   List.iter recs ~f:(fun book -> Book.print book)
 ;;

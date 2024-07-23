@@ -1,6 +1,5 @@
 open Async
 open! Core
-open Fzf
 
 let every (seconds : float) ~f ~stop =
   let open Async in
@@ -39,21 +38,29 @@ let get_user_response () =
 let rec run_recommender (state : Book_recommender.State.t) =
   let%map response = get_user_response () in
   match response with
-  | Message.Interested -> ()
-  | Not_Interested -> ()
-  | Read_liked -> ()
-  | Read_didnt_like -> ()
-  | Done -> ()
+  | Message.Interested ->
+    Handle.handle_yes ~state;
+    run_recommender state |> ignore
+  | Not_Interested ->
+    Handle.handle_no ~state;
+    run_recommender state |> ignore
+  | Read_liked ->
+    Handle.handle_read_yes ~state;
+    run_recommender state |> ignore
+  | Read_didnt_like ->
+    Handle.handle_read_no ~state;
+    run_recommender state |> ignore
+  | Done -> Handle.handle_done ~state
 ;;
 
 let run () =
-  print_string "Please input the name of your favorite\n   book! "
-in
-let origin_book =
-  Page_parser.Book_page.parse_book
-    (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W")
-in
-let state = Book_recommender.State.empty_state in
-state.current_book <- origin_book;
-Handle._handle_yes ~state;
-run_recommender state
+  print_string "Please input the name of your favorite\n   book! ";
+  let origin_book =
+    Page_parser.Book_page.parse_book
+      (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W")
+  in
+  let state = Book_recommender.State.empty_state in
+  state.current_book <- origin_book;
+  Handle.handle_yes ~state;
+  run_recommender state
+;;
