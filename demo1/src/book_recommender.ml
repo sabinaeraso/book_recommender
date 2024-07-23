@@ -4,7 +4,7 @@ module State = struct
   type t =
     { mutable visited : Book.Key.t list
     ; to_visit : Book.Binary_heap.t
-    ; recommendations : Book.t list
+    ; mutable recommendations : Book.t list
     }
   [@@deriving sexp_of]
 end

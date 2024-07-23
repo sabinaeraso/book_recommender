@@ -11,6 +11,7 @@
   ocamlgraph
   lambdasoup
   uri
-  yojson)
+  yojson
+  fzf)
  (preprocess
   (pps ppx_jane ppx_inline_test)))
