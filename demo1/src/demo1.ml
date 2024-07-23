@@ -3,6 +3,10 @@ open! Core
 let command =
   Command.group
     ~summary:
-      "Allows you to fetch raw data, and parsed data from Open Library"
-    [ "fetch", Book_fetch.command; "parse", Page_parser.command ]
+      "Allows you to fetch raw data, and parsed data from Open Library, run \
+       program"
+    [ "fetch", Book_fetch.command
+    ; "parse", Page_parser.command
+    ; "run", Reader_input.command
+    ]
 ;;
