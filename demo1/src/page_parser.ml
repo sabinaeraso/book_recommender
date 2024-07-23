@@ -13,17 +13,21 @@ let make_subject_list_from_json (json_list : Yojson.Safe.t) =
   | _ -> failwith "Subjects not properly formatted"
 ;;
 
+let find_field (field_name : string) (fields : (string * Yojson.Safe.t) list)
+  =
+  match
+    List.find_map fields ~f:(fun (name, key) ->
+      if String.equal name field_name then Some key else None)
+  with
+  | Some elt -> elt
+  | None -> failwith "No info found for this field"
+;;
+
 let make_book_from_json (book_info : Yojson.Safe.t) =
   match book_info with
   | `Assoc fields ->
-    let key =
-      List.find_map_exn fields ~f:(fun (name, key) ->
-        if String.equal name "key" then Some key else None)
-    in
-    let title =
-      List.find_map_exn fields ~f:(fun (name, title) ->
-        if String.equal name "title" then Some title else None)
-    in
+    let key = find_field "key" fields in
+    let title = find_field "title" fields in
     let isbn =
       List.find_map fields ~f:(fun (name, isbn) ->
         if String.equal name "isbn"
@@ -35,9 +39,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
         else None)
     in
     let subjects =
-      make_subject_list_from_json
-        (List.find_map_exn fields ~f:(fun (name, subject) ->
-           if String.equal name "subject" then Some subject else None))
+      make_subject_list_from_json (find_field "subject" fields)
     in
     Book.create
       ~title:(format_field (Yojson.Safe.to_string title))
@@ -80,14 +82,8 @@ module Book_page = struct
   let make_book_from_book_json (book_info : Yojson.Safe.t) =
     match book_info with
     | `Assoc fields ->
-      let key =
-        List.find_map_exn fields ~f:(fun (name, key) ->
-          if String.equal name "key" then Some key else None)
-      in
-      let title =
-        List.find_map_exn fields ~f:(fun (name, title) ->
-          if String.equal name "title" then Some title else None)
-      in
+      let key = find_field "key" fields in
+      let title = find_field "title" fields in
       let isbn =
         List.find_map fields ~f:(fun (name, isbn) ->
           if String.equal name "isbn"
@@ -96,9 +92,7 @@ module Book_page = struct
           else None)
       in
       let subjects =
-        make_subject_list_from_json
-          (List.find_map_exn fields ~f:(fun (name, subject) ->
-             if String.equal name "subjects" then Some subject else None))
+        make_subject_list_from_json (find_field "subjects" fields)
       in
       Book.create
         ~title:(format_field (Yojson.Safe.to_string title))
