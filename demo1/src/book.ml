@@ -16,7 +16,7 @@ type t =
 let print book =
   match book.isbn with
   | Some isbn ->
-    printf
+    Core.printf
       !{|Title: %{sexp:Title.t}
 Key: %{sexp:Key.t}
 Isbn: %{sexp:Isbn.t}
@@ -25,7 +25,7 @@ Isbn: %{sexp:Isbn.t}
       book.key
       isbn
   | None ->
-    printf
+    Core.printf
       !{|Title: %{sexp:Title.t}
 Key: %{sexp:Key.t}
 |}
