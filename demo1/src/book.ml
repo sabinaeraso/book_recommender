@@ -9,18 +9,32 @@ type t =
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
-  ; heuristic : int
+  ; mutable heuristic : int
   }
-[@@deriving sexp, compare, hash]
+[@@deriving sexp, compare]
 
 let print book =
-  printf !{|Title: %{sexp:Title.t}
+  match book.isbn with
+  | Some isbn ->
+    printf
+      !{|Title: %{sexp:Title.t}
 Key: %{sexp:Key.t}
-|} book.title book.key
+Isbn: %{sexp:Isbn.t}
+|}
+      book.title
+      book.key
+      isbn
+  | None ->
+    printf
+      !{|Title: %{sexp:Title.t}
+Key: %{sexp:Key.t}
+|}
+      book.title
+      book.key
 ;;
 
-let create ~title ~key ~subjects ~isbn ~heuristic =
-  { title; key; subjects; isbn; heuristic }
+let create ~title ~key ~subjects ~isbn =
+  { title; key; subjects; isbn; heuristic = 0 }
 ;;
 
 let compare_by_heuristic =

@@ -21,16 +21,15 @@ type t =
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
-  ; heuristic : int
+  ; mutable heuristic : int
   }
-[@@deriving sexp, compare, hash]
+[@@deriving sexp, compare]
 
 val create
   :  title:string
   -> key:string
   -> subjects:string list
   -> isbn:int option
-  -> heuristic:int
   -> t
 
 val print : t -> unit
