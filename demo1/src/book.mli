@@ -25,6 +25,7 @@ type t =
   }
 [@@deriving sexp, compare]
 
+(* creates a new book and initilizes the heuristic to 0*)
 val create
   :  title:string
   -> key:string
@@ -32,6 +33,7 @@ val create
   -> isbn:int option
   -> t
 
+(* prints the title and Open Library key of a book*)
 val print : t -> unit
 val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list

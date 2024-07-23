@@ -38,9 +38,9 @@ let update_to_visit_from_subject ~(state : State.t) ~subject =
     then Book.Binary_heap.add to_visit book)
 ;;
 
-let%expect_test "Get books from subject: Tooth Fairy" =
+let%expect_test "Get books from subject: Fantasy_fiction" =
   let state = State.empty_state in
-  update_to_visit_from_subject ~state ~subject:"tooth_fairy";
+  update_to_visit_from_subject ~state ~subject:"Fantasy_fiction";
   Book.Binary_heap.iter (fun book -> Book.print book) state.to_visit
 ;;
 
