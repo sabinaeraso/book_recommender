@@ -1,8 +1,9 @@
 open! Core
 
 type t =
-  | Yes of Book.t
-  | No of Book.t
-  | Read_yes of Book.t
-  | Read_no of Book.t
+  | Interested
+  | Not_Interested
+  | Read_liked
+  | Read_didnt_like
+  | Done
 [@@deriving sexp_of]
