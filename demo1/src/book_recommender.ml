@@ -10,7 +10,7 @@ module State = struct
 end
 
 (* user said yes to X book, so now we call this on all tis subjects : *)
-let get_books_from_subject ~(state : State.t) ~subject =
+let update_to_visit_from_subject ~(state : State.t) ~subject =
   let visited = state.visited in
   let to_visit = state.to_visit in
   let books_raw = Book_fetch.Fetcher.Subjects.fetch_sub subject in
@@ -25,7 +25,7 @@ let get_books_from_subject ~(state : State.t) ~subject =
 let%expect_test "Get books from subject" =
   let dummy =
     Book.create
-      ~title:"Harry Potter"
+      ~title:"Dummy"
       ~key:"Key"
       ~subjects:[]
       ~isbn:(Some 1)
@@ -33,12 +33,14 @@ let%expect_test "Get books from subject" =
   in
   let state =
     { State.visited = []
-    ; to_visit = Book.Binary_heap.create ~dummy 200
+    ; to_visit = Book.Binary_heap.create ~dummy 1
     ; recommendations = []
     }
   in
-  get_books_from_subject ~state ~subject:"tooth_fairy";
-  print_s [%message (state.to_visit : Book.Binary_heap.t)]
+  update_to_visit_from_subject ~state ~subject:"tooth_fairy";
+  Book.Binary_heap.iter
+    (fun book -> print_s [%message (Book.to_string book : string)])
+    state.to_visit
 ;;
 
 let _get_next_book ~(state : State.t) =
