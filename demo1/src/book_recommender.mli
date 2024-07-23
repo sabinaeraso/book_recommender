@@ -8,6 +8,8 @@ module State : sig
     ; mutable current_book : Book.t
     }
   [@@deriving sexp_of]
+
+  val empty_state : t
 end
 
 (*takes in the current state and a new subject. adds all the books from this
