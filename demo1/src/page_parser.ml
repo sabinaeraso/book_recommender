@@ -2,9 +2,14 @@ open! Core
 
 let parse_from_string (page : string) = Yojson.Safe.from_string page
 
+let format_field (str : string) =
+  String.split_on_chars str ~on:[ '\\'; '\"' ] |> String.concat
+;;
+
 let make_subject_list_from_json (json_list : Yojson.Safe.t) =
   match json_list with
-  | `List subjects -> List.map subjects ~f:Yojson.Safe.to_string
+  | `List subjects ->
+    List.map subjects ~f:(fun x -> Yojson.Safe.to_string x |> format_field)
   | _ -> failwith "Subjects not properly formatted"
 ;;
 
@@ -20,11 +25,14 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
         if String.equal name "title" then Some title else None)
     in
     let isbn =
-      None
-      (* List.find_map fields ~f:(fun (name, isbn) -> if String.equal name
-         "isbn" && not (String.equal (Yojson.Safe.to_string isbn) "null")
-         then ( match isbn with | `List isbns -> Some (List.hd_exn isbns) | _
-         -> Some isbn) else None) *)
+      List.find_map fields ~f:(fun (name, isbn) ->
+        if String.equal name "isbn"
+           && not (String.equal (Yojson.Safe.to_string isbn) "null")
+        then (
+          match isbn with
+          | `List isbns -> Some (List.hd_exn isbns)
+          | _ -> Some isbn)
+        else None)
     in
     let subjects =
       make_subject_list_from_json
@@ -32,12 +40,13 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
            if String.equal name "subject" then Some subject else None))
     in
     Book.create
-      ~title:(Yojson.Safe.to_string title)
-      ~key:(Yojson.Safe.to_string key)
+      ~title:(format_field (Yojson.Safe.to_string title))
+      ~key:(format_field (Yojson.Safe.to_string key))
       ~isbn:
         (match isbn with
          | None -> None
-         | Some num -> Some (Int.of_string (Yojson.Safe.to_string num)))
+         | Some num ->
+           Some (Int.of_string (format_field (Yojson.Safe.to_string num))))
       ~subjects
       ~heuristic:1
   | _ -> failwith "Was not properly formatted"
@@ -81,10 +90,11 @@ module Book_page = struct
           if String.equal name "title" then Some title else None)
       in
       let isbn =
-        None
-        (* List.find_map fields ~f:(fun (name, isbn) -> if String.equal name
-           "isbn" && not (String.equal (Yojson.Safe.to_string isbn) "null")
-           then Some isbn else None) *)
+        List.find_map fields ~f:(fun (name, isbn) ->
+          if String.equal name "isbn"
+             && not (String.equal (Yojson.Safe.to_string isbn) "null")
+          then Some isbn
+          else None)
       in
       let subjects =
         make_subject_list_from_json
@@ -92,12 +102,13 @@ module Book_page = struct
              if String.equal name "subjects" then Some subject else None))
       in
       Book.create
-        ~title:(Yojson.Safe.to_string title)
-        ~key:(Yojson.Safe.to_string key)
+        ~title:(format_field (Yojson.Safe.to_string title))
+        ~key:(format_field (Yojson.Safe.to_string key))
         ~isbn:
           (match isbn with
            | None -> None
-           | Some num -> Some (Int.of_string (Yojson.Safe.to_string num)))
+           | Some num ->
+             Some (Int.of_string (format_field (Yojson.Safe.to_string num))))
         ~subjects
         ~heuristic:1
     | _ -> failwith "Was not properly formatted"
