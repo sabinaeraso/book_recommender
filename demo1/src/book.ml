@@ -13,13 +13,10 @@ type t =
   }
 [@@deriving sexp, compare, hash]
 
-let to_string book =
-  Core.sprintf
-    !{|Title: %{sexp:Title.t}
+let print book =
+  printf !{|Title: %{sexp:Title.t}
 Key: %{sexp:Key.t}
-|}
-    book.title
-    book.key
+|} book.title book.key
 ;;
 
 let create ~title ~key ~subjects ~isbn ~heuristic =

@@ -33,7 +33,7 @@ val create
   -> heuristic:int
   -> t
 
-val to_string : t -> string
+val print : t -> unit
 val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list
 val key : t -> Key.t

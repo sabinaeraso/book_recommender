@@ -38,9 +38,7 @@ let%expect_test "Get books from subject" =
     }
   in
   update_to_visit_from_subject ~state ~subject:"tooth_fairy";
-  Book.Binary_heap.iter
-    (fun book -> print_s [%message (Book.to_string book : string)])
-    state.to_visit
+  Book.Binary_heap.iter (fun book -> Book.print book) state.to_visit
 ;;
 
 let _get_next_book ~(state : State.t) =
