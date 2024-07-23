@@ -48,7 +48,6 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
          | Some num ->
            Some (Int.of_string (format_field (Yojson.Safe.to_string num))))
       ~subjects
-      ~heuristic:1
   | _ -> failwith "Was not properly formatted"
 ;;
 
@@ -110,7 +109,6 @@ module Book_page = struct
            | Some num ->
              Some (Int.of_string (format_field (Yojson.Safe.to_string num))))
         ~subjects
-        ~heuristic:1
     | _ -> failwith "Was not properly formatted"
   ;;
 
