@@ -28,6 +28,22 @@ let response_options =
        Message.all)
 ;;
 
+let get_origin_book_input () =
+  let%bind book_name =
+    Async_interactive.ask_dispatch_gen
+      ~f:(fun s -> Ok s)
+      "What is the book you want to start with?  "
+  in
+  return book_name
+;;
+
+let get_origin_book () =
+  let%bind name_to_search = get_origin_book_input () in
+  return
+    (Page_parser.Search_page.parse_searches
+       (Book_fetch.Fetcher.Search_by_name.fetch_from_search name_to_search))
+;;
+
 let get_user_response (state : Book_recommender.State.t) =
   let current_book = state.current_book in
   let current_title = current_book.title in
@@ -60,10 +76,9 @@ let rec run_recommender (state : Book_recommender.State.t) =
 
 let run () =
   print_endline "Please input the name of your favorite book! ";
-  let origin_book =
-    Page_parser.Book_page.parse_book
-      (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W")
-  in
+  (* let origin_book = Page_parser.Book_page.parse_book
+     (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W") in *)
+  let%bind origin_book = get_origin_book () in
   let state = Book_recommender.State.empty_state in
   state.current_book <- origin_book;
   Handle.handle_read_yes ~state;
