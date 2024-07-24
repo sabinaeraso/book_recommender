@@ -12,7 +12,7 @@ let format_field (str : string) =
    '\\'; '\"' ] |> List.map ~f:(fun s -> (String.to_list s)) |> List.map
    ~f:(fun c -> Stdlib.Uchar.of_char c) |> Stdlib.Uchar. |> String.concat
    ;; *)
-let format_field_subjects (str : string) =
+let _format_field_subjects (str : string) =
   String.split_on_chars str ~on:[ '\\'; '\"'; '/' ]
   |> List.map ~f:String.escaped
   |> String.concat

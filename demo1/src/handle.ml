@@ -27,7 +27,11 @@ let handle_read_yes ~(state : Book_recommender.State.t) =
   state.visited <- List.append state.visited [ book.key ];
   let subjects = book.subjects in
   List.iter subjects ~f:(fun subject ->
-    Book_recommender.update_to_visit_from_subject ~state ~subject);
+    let valid_subject =
+      Or_error.try_with (fun () ->
+        Book_recommender.update_to_visit_from_subject ~state ~subject)
+    in
+    match valid_subject with Ok _ -> () | Error _ -> ());
   let next_book = Book_recommender.get_next_book ~state in
   state.current_book <- next_book
 ;;
