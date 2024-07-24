@@ -47,9 +47,16 @@ let get_origin_book () =
 let get_user_response (state : Book_recommender.State.t) =
   let current_book = state.current_book in
   let current_title = current_book.title in
+  let description =
+    Page_parser.Book_page.get_book_description
+      (Book_fetch.Fetcher.Books.fetch_key current_book.key)
+  in
   let open Deferred.Let_syntax in
   let%bind response =
-    pick_one response_options ~prompt_at_top:() ~header:current_title
+    pick_one
+      response_options
+      ~prompt_at_top:()
+      ~header:(current_title ^ "\n" ^ description)
   in
   match ok_exn response with
   | None -> failwith "Did not select one of the options"

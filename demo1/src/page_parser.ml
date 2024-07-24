@@ -2,10 +2,9 @@ open! Core
 
 let parse_from_string (page : string) = Yojson.Safe.from_string page
 
+(* Controls the formal that fields get saved in the Book.t*)
 let format_field (str : string) =
-  String.split_on_chars str ~on:[ '\\'; '\"' ]
-  (* |> List.map ~f:String.escaped *)
-  |> String.concat
+  String.split_on_chars str ~on:[ '\\'; '\"' ] |> String.concat
 ;;
 
 (* let format_field_ascii (str : string) = String.split_on_chars str ~on:[
@@ -49,7 +48,6 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
         else None)
     in
     let subjects =
-      (* List.sub ~pos:0 ~len:3 *)
       make_subject_list_from_json (find_field "subject" fields)
     in
     Book.create
@@ -120,6 +118,15 @@ module Book_page = struct
 
   let parse_book (raw_page : string) =
     make_book_from_book_json (parse_from_string raw_page)
+  ;;
+
+  let get_book_description (raw_page : string) =
+    let parsed = parse_from_string raw_page in
+    match parsed with
+    | `Assoc fields ->
+      let desc = find_field "description" fields in
+      Yojson.Safe.to_string desc
+    | _ -> failwith "Was not a properly formatted JSON file"
   ;;
 end
 

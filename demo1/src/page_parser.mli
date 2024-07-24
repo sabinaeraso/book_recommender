@@ -6,6 +6,7 @@ end
 
 module Book_page : sig
   val parse_book : string -> Book.t
+  val get_book_description : string -> string
 end
 
 module Search_page : sig
