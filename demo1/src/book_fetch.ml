@@ -21,8 +21,8 @@ module Fetcher = struct
     ;;
 
     let fetch_sub ?limit (subject : string) =
-      (* print_endline (format_name subject); print_endline
-         (create_subject_search_url subject); *)
+      print_endline (format_name subject);
+      print_endline (create_subject_search_url subject);
       let start = create_subject_search_url subject in
       let url =
         match limit with None -> start | Some lim -> add_limit start lim

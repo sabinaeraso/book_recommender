@@ -3,7 +3,15 @@ open! Core
 let parse_from_string (page : string) = Yojson.Safe.from_string page
 
 let format_field (str : string) =
-  String.split_on_chars str ~on:[ '\\'; '\"' ] |> String.concat
+  String.split_on_chars str ~on:[ '\\'; '\"' ]
+  |> List.map ~f:String.escaped
+  |> String.concat
+;;
+
+let format_field_subjects (str : string) =
+  String.split_on_chars str ~on:[ '\\'; '\"'; '/' ]
+  |> List.map ~f:String.escaped
+  |> String.concat
 ;;
 
 let make_subject_list_from_json (json_list : Yojson.Safe.t) =
@@ -95,10 +103,8 @@ module Book_page = struct
           else None)
       in
       let subjects =
-        List.sub
-          ~pos:0
-          ~len:5
-          (make_subject_list_from_json (find_field "subjects" fields))
+        (* List.sub ~pos:0 ~len:5 *)
+        make_subject_list_from_json (find_field "subjects" fields)
       in
       Book.create
         ~title:(format_field (Yojson.Safe.to_string title))
