@@ -51,10 +51,8 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
         else None)
     in
     let subjects =
-      List.sub
-        ~pos:0
-        ~len:3
-        (make_subject_list_from_json (find_field "subject" fields))
+      (* List.sub ~pos:0 ~len:3 *)
+      make_subject_list_from_json (find_field "subject" fields)
     in
     Book.create
       ~title:(format_field (Yojson.Safe.to_string title))

@@ -51,7 +51,7 @@ module Fetcher = struct
 
   module Search_by_name = struct
     let create_search_url (name : string) =
-      prefix ^ "/search.json?q=" ^ format_name name
+      prefix ^ "search.json?q=" ^ format_name name
     ;;
 
     let fetch_from_search name =
