@@ -3,21 +3,32 @@ module Isbn = Int [@@deriving sexp, compare, hash]
 module Key = String [@@deriving sexp, compare, hash]
 module Title = String [@@deriving sexp, compare, hash]
 module Subject = String [@@deriving sexp, compare, hash]
+module Author = String [@@deriving sexp, compare, hash]
+module Description = String [@@deriving sexp, compare, hash]
 
 type t =
   { title : Title.t
+  ; author : Author.t
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
   ; mutable heuristic : int
+  ; mutable description : Description.t
   }
 [@@deriving sexp, compare]
 
 let print book = Core.printf !{|Title: %{sexp:Title.t}
 |} book.title
 
-let create ~title ~key ~subjects ~isbn =
-  { title; key; subjects; isbn; heuristic = 0 }
+let create ~title ~author ~key ~subjects ~isbn =
+  { title
+  ; author
+  ; key
+  ; subjects
+  ; isbn
+  ; heuristic = Int.max_value
+  ; description = ""
+  }
 ;;
 
 let compare_by_heuristic =
@@ -29,6 +40,8 @@ let key t = t.key
 let isbn t = t.isbn
 let title t = t.title
 let heuristic t = t.heuristic
+let author t = t.author
+let description t = t.description
 
 module T = struct
   type nonrec t = t [@@deriving sexp]
