@@ -4,7 +4,7 @@ let parse_from_string (page : string) = Yojson.Safe.from_string page
 
 let format_field (str : string) =
   String.split_on_chars str ~on:[ '\\'; '\"' ]
-  |> List.map ~f:String.escaped
+  (* |> List.map ~f:String.escaped *)
   |> String.concat
 ;;
 
@@ -13,9 +13,7 @@ let format_field (str : string) =
    ~f:(fun c -> Stdlib.Uchar.of_char c) |> Stdlib.Uchar. |> String.concat
    ;; *)
 let _format_field_subjects (str : string) =
-  String.split_on_chars str ~on:[ '\\'; '\"'; '/' ]
-  |> List.map ~f:String.escaped
-  |> String.concat
+  String.split_on_chars str ~on:[ '\\'; '\"'; '/' ] |> String.concat
 ;;
 
 let make_subject_list_from_json (json_list : Yojson.Safe.t) =
