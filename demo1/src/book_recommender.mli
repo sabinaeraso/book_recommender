@@ -2,10 +2,11 @@ open! Core
 
 module State : sig
   type t =
-    { mutable visited : Book.Key.t list
+    { mutable visited_books : Book.Key.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
+    ; mutable visited_subjects : string list
     }
   [@@deriving sexp_of]
 
