@@ -31,28 +31,30 @@ let response_options =
 let get_user_response () =
   let open Deferred.Let_syntax in
   print_endline "reached this point";
-  let%bind response = pick_one response_options in
+  let%bind response =
+    pick_one response_options ~prompt_at_top:() ~header:"Test"
+  in
   match ok_exn response with
   | None -> failwith "Did not select one of the options"
   | Some message -> return message
 ;;
 
 let rec run_recommender (state : Book_recommender.State.t) =
-  let%map response = get_user_response () in
+  let%bind response = get_user_response () in
   match response with
   | Message.Interested ->
     Handle.handle_yes ~state;
-    run_recommender state |> ignore
+    run_recommender state
   | Not_Interested ->
     Handle.handle_no ~state;
-    run_recommender state |> ignore
+    run_recommender state
   | Read_liked ->
     Handle.handle_read_yes ~state;
-    run_recommender state |> ignore
+    run_recommender state
   | Read_didnt_like ->
     Handle.handle_read_no ~state;
-    run_recommender state |> ignore
-  | Done -> Handle.handle_done ~state
+    run_recommender state
+  | Done -> return (Handle.handle_done ~state)
 ;;
 
 let run () =
@@ -63,7 +65,7 @@ let run () =
   in
   let state = Book_recommender.State.empty_state in
   state.current_book <- origin_book;
-  Handle.handle_yes ~state;
+  Handle.handle_read_yes ~state;
   run_recommender state
 ;;
 
