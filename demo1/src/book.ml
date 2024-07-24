@@ -13,25 +13,8 @@ type t =
   }
 [@@deriving sexp, compare]
 
-let print book =
-  match book.isbn with
-  | Some isbn ->
-    Core.printf
-      !{|Title: %{sexp:Title.t}
-Key: %{sexp:Key.t}
-Isbn: %{sexp:Isbn.t}
-|}
-      book.title
-      book.key
-      isbn
-  | None ->
-    Core.printf
-      !{|Title: %{sexp:Title.t}
-Key: %{sexp:Key.t}
-|}
-      book.title
-      book.key
-;;
+let print book = Core.printf !{|Title: %{sexp:Title.t}
+|} book.title
 
 let create ~title ~key ~subjects ~isbn =
   { title; key; subjects; isbn; heuristic = 0 }
