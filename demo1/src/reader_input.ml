@@ -1,5 +1,6 @@
 open Async
 open! Core
+open Fzf
 
 let every (seconds : float) ~f ~stop =
   let open Async in
@@ -29,10 +30,11 @@ let response_options =
 
 let get_user_response () =
   let open Deferred.Let_syntax in
-  let%map response = Fzf.pick_one response_options in
+  print_endline "reached this point";
+  let%bind response = pick_one response_options in
   match ok_exn response with
   | None -> failwith "Did not select one of the options"
-  | Some message -> message
+  | Some message -> return message
 ;;
 
 let rec run_recommender (state : Book_recommender.State.t) =
@@ -54,16 +56,14 @@ let rec run_recommender (state : Book_recommender.State.t) =
 ;;
 
 let run () =
-  Core.print_string "Please input the name of your favorite book! ";
+  print_endline "Please input the name of your favorite book! ";
   let origin_book =
     Page_parser.Book_page.parse_book
       (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W")
   in
   let state = Book_recommender.State.empty_state in
   state.current_book <- origin_book;
-  print_s [%sexp (origin_book : Book.t)];
   Handle.handle_yes ~state;
-  print_s [%sexp (state : Book_recommender.State.t)];
   run_recommender state
 ;;
 
