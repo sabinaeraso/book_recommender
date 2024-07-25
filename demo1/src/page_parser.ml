@@ -48,9 +48,15 @@ let find_field (field_name : string) (fields : (string * Yojson.Safe.t) list)
   | None -> failwith "No info found for this field"
 ;;
 
-let parse_author (author : Yojson.Safe.t) : Yojson.Safe.t =
-  match author with
-  | `Assoc fields -> find_field "name" fields
+let parse_author (authors : Yojson.Safe.t) : Yojson.Safe.t =
+  match authors with
+  | `List author_list ->
+    (match List.hd author_list with
+     | Some author_map ->
+       (match author_map with
+        | `Assoc fields -> find_field "name" fields
+        | _ -> failwith "Author field not association list")
+     | None -> failwith "No authors in list")
   | _ -> failwith "Not properly formatted author field"
 ;;
 
@@ -61,7 +67,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
     let title = find_field "title" fields in
     let author =
       List.find_map fields ~f:(fun (name, author) ->
-        if String.equal name "author"
+        if String.equal name "authors"
         then
           Some (format_field (Yojson.Safe.to_string (parse_author author)))
         else None)
@@ -125,7 +131,7 @@ module Book_page = struct
       let title = find_field "title" fields in
       let author =
         List.find_map fields ~f:(fun (name, author) ->
-          if String.equal name "author"
+          if String.equal name "authors"
           then
             Some (format_field (Yojson.Safe.to_string (parse_author author)))
           else None)
