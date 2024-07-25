@@ -53,7 +53,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
     in
     Book.create
       ~title:(format_field (Yojson.Safe.to_string title))
-      ~author:(format_field "")
+      ~author:(Some (format_field ""))
       ~key:(format_field (Yojson.Safe.to_string key))
       ~isbn:
         (match isbn with
@@ -109,7 +109,7 @@ module Book_page = struct
       in
       Book.create
         ~title:(format_field (Yojson.Safe.to_string title))
-        ~author:(format_field "")
+        ~author:(Some (format_field ""))
         ~key:(format_field (Yojson.Safe.to_string key))
         ~isbn:
           (match isbn with

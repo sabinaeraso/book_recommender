@@ -38,7 +38,7 @@ type t =
 (* creates a new book and initilizes the heuristic to 0*)
 val create
   :  title:string
-  -> author:string
+  -> author:string option
   -> key:string
   -> subjects:string list
   -> isbn:int option

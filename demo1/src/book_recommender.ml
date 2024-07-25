@@ -14,7 +14,7 @@ module State = struct
     let dummy =
       Book.create
         ~title:"Dummy"
-        ~author:"Dummy"
+        ~author:None
         ~key:"Key"
         ~subjects:[]
         ~isbn:(Some 1)
