@@ -37,6 +37,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
   | `Assoc fields ->
     let key = find_field "key" fields in
     let title = find_field "title" fields in
+    let author = find_field "author" fields in
     let isbn =
       List.find_map fields ~f:(fun (name, isbn) ->
         if String.equal name "isbn"
@@ -52,6 +53,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
     in
     Book.create
       ~title:(format_field (Yojson.Safe.to_string title))
+      ~author:(format_field (Yojson.Safe.to_string author))
       ~key:(format_field (Yojson.Safe.to_string key))
       ~isbn:
         (match isbn with
@@ -93,6 +95,7 @@ module Book_page = struct
     | `Assoc fields ->
       let key = find_field "key" fields in
       let title = find_field "title" fields in
+      let author = find_field "author" fields in
       let isbn =
         List.find_map fields ~f:(fun (name, isbn) ->
           if String.equal name "isbn"
@@ -106,6 +109,7 @@ module Book_page = struct
       in
       Book.create
         ~title:(format_field (Yojson.Safe.to_string title))
+        ~author:(format_field (Yojson.Safe.to_string author))
         ~key:(format_field (Yojson.Safe.to_string key))
         ~isbn:
           (match isbn with

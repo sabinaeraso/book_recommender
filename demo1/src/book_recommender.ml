@@ -12,7 +12,12 @@ module State = struct
 
   let empty_state =
     let dummy =
-      Book.create ~title:"Dummy" ~key:"Key" ~subjects:[] ~isbn:(Some 1)
+      Book.create
+        ~title:"Dummy"
+        ~author:"Dummy"
+        ~key:"Key"
+        ~subjects:[]
+        ~isbn:(Some 1)
     in
     let state =
       { visited_books = []
@@ -39,7 +44,7 @@ let update_to_visit_from_subject ~(state : State.t) ~subject =
     let books = Page_parser.Subject_page.parse_books books_raw in
     List.iter books ~f:(fun (book : Book.t) ->
       let key = Book.key book in
-      book.heuristic <- book.heuristic + 1;
+      book.heuristic <- book.heuristic - 1;
       if not
            (List.exists visited_books ~f:(fun k ->
               equal 0 (Book.Key.compare k key)))
