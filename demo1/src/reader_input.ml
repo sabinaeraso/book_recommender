@@ -38,18 +38,25 @@ let get_origin_book_input () =
 ;;
 
 let rec get_origin_book () =
-  let valid_book =
-    Or_error.try_with (fun () ->
-      let%map name_to_search = get_origin_book_input () in
-      Page_parser.Search_page.parse_searches
-        (Book_fetch.Fetcher.Search_by_name.fetch_from_search name_to_search))
+  let%bind name_to_search = get_origin_book_input () in
+  let raw_page =
+    Book_fetch.Fetcher.Search_by_name.fetch_from_search name_to_search
   in
-  match valid_book with
-  | Ok book -> book
+  let valid =
+    Or_error.try_with (fun () ->
+      Page_parser.Search_page.parse_searches raw_page)
+  in
+  match valid with
+  | Ok book -> return book
   | Error _ ->
-    print_endline "Could not find book please try different title";
+    print_endline
+      "Could not find book of that title please try different title! \n";
     get_origin_book ()
 ;;
+
+(* in *)
+(* match valid_book with | Ok book -> book | Error _ -> print_endline "Could
+   not find book please try different title"; get_origin_book () *)
 
 let get_user_response (state : Book_recommender.State.t) =
   let current_book = state.current_book in
@@ -78,8 +85,7 @@ let get_user_response (state : Book_recommender.State.t) =
         (current_title
          ^ "\n"
          ^ author_name
-         ^ "\n"
-         ^ Int.to_string current_book.heuristic
+         (* ^ "\n" ^ Int.to_string current_book.heuristic *)
          ^ "\n"
          ^ description
          ^ "\n")
@@ -90,7 +96,6 @@ let get_user_response (state : Book_recommender.State.t) =
 ;;
 
 let rec run_recommender (state : Book_recommender.State.t) =
-  print_s [%sexp (state : Book_recommender.State.t)];
   let%bind response = get_user_response state in
   match response with
   | Message.Interested ->

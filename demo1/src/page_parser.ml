@@ -189,7 +189,7 @@ module Search_page = struct
        | `List search_list ->
          let most_rel = List.hd search_list in
          (match most_rel with
-          | None -> raise (failwith "No books from that search!")
+          | None -> failwith "No books from that search!"
           | Some book -> make_book_from_json book)
        | _ -> failwith "Docs not formatted correctly")
     | _ -> failwith "Returned page not formatted correctly"
