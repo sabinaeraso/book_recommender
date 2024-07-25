@@ -37,26 +37,39 @@ let get_origin_book_input () =
   return book_name
 ;;
 
-let get_origin_book () =
-  let%bind name_to_search = get_origin_book_input () in
-  return
-    (Page_parser.Search_page.parse_searches
-       (Book_fetch.Fetcher.Search_by_name.fetch_from_search name_to_search))
+let rec get_origin_book () =
+  let valid_book =
+    Or_error.try_with (fun () ->
+      let%map name_to_search = get_origin_book_input () in
+      Page_parser.Search_page.parse_searches
+        (Book_fetch.Fetcher.Search_by_name.fetch_from_search name_to_search))
+  in
+  match valid_book with
+  | Ok book -> book
+  | Error _ ->
+    print_endline "Could not find book please try different title";
+    get_origin_book ()
 ;;
 
 let get_user_response (state : Book_recommender.State.t) =
   let current_book = state.current_book in
   let current_title = current_book.title in
+  let valid_desc =
+    Or_error.try_with (fun () ->
+      Page_parser.Book_page.get_book_description
+        (Book_fetch.Fetcher.Books.fetch_key current_book.key))
+  in
   let description =
-    Page_parser.Book_page.get_book_description
-      (Book_fetch.Fetcher.Books.fetch_key current_book.key)
+    match valid_desc with
+    | Ok desc -> desc
+    | Error _ -> "No Description Found"
   in
   let open Deferred.Let_syntax in
   let%bind response =
     pick_one
       response_options
       ~prompt_at_top:()
-      ~header:(current_title ^ "\n" ^ description)
+      ~header:(current_title ^ "\n" ^ description ^ "\n")
   in
   match ok_exn response with
   | None -> failwith "Did not select one of the options"
