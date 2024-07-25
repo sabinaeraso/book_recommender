@@ -15,10 +15,26 @@ let _format_field_subjects (str : string) =
   String.split_on_chars str ~on:[ '\\'; '\"'; '/' ] |> String.concat
 ;;
 
+let subject_is_valid ~subject =
+  let banned_keywords =
+    [ "translation"; "interpretation"; "language material" ]
+  in
+  List.fold banned_keywords ~init:true ~f:(fun state word ->
+    let lower_subject = String.lowercase subject in
+    if String.is_substring ~substring:word lower_subject
+    then false
+    else state)
+;;
+
 let make_subject_list_from_json (json_list : Yojson.Safe.t) =
   match json_list with
   | `List subjects ->
-    List.map subjects ~f:(fun x -> Yojson.Safe.to_string x |> format_field)
+    List.filter_map subjects ~f:(fun x ->
+      let subject = Yojson.Safe.to_string x in
+      let formatted_subject = format_field subject in
+      if subject_is_valid ~subject:formatted_subject
+      then Some formatted_subject
+      else None)
   | _ -> failwith "Subjects not properly formatted"
 ;;
 
