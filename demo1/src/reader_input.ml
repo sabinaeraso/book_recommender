@@ -74,7 +74,15 @@ let get_user_response (state : Book_recommender.State.t) =
     pick_one
       response_options
       ~prompt_at_top:()
-      ~header:(current_title ^ "\n" ^ author_name ^ "\n" ^ description ^ "\n")
+      ~header:
+        (current_title
+         ^ "\n"
+         ^ author_name
+         ^ "\n"
+         ^ Int.to_string current_book.heuristic
+         ^ "\n"
+         ^ description
+         ^ "\n")
   in
   match ok_exn response with
   | None -> failwith "Did not select one of the options"
@@ -82,6 +90,7 @@ let get_user_response (state : Book_recommender.State.t) =
 ;;
 
 let rec run_recommender (state : Book_recommender.State.t) =
+  print_s [%sexp (state : Book_recommender.State.t)];
   let%bind response = get_user_response state in
   match response with
   | Message.Interested ->
