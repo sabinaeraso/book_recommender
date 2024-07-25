@@ -26,7 +26,7 @@ end
 
 type t =
   { title : Title.t
-  ; author : Author.t
+  ; author : Author.t option
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
@@ -46,7 +46,7 @@ val create
 
 (* prints the title and Open Library key of a book*)
 val print : t -> unit
-val author : t -> Author.t
+val author : t -> Author.t option
 val description : t -> Description.t
 val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list

@@ -8,7 +8,7 @@ module Description = String [@@deriving sexp, compare, hash]
 
 type t =
   { title : Title.t
-  ; author : Author.t
+  ; author : Author.t option
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
