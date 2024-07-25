@@ -64,12 +64,17 @@ let get_user_response (state : Book_recommender.State.t) =
     | Ok desc -> desc
     | Error _ -> "No Description Found"
   in
+  let author_name =
+    match current_book.author with
+    | Some name -> name
+    | None -> "No author found"
+  in
   let open Deferred.Let_syntax in
   let%bind response =
     pick_one
       response_options
       ~prompt_at_top:()
-      ~header:(current_title ^ "\n" ^ description ^ "\n")
+      ~header:(current_title ^ "\n" ^ author_name ^ "\n" ^ description ^ "\n")
   in
   match ok_exn response with
   | None -> failwith "Did not select one of the options"
