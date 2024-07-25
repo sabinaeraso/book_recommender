@@ -32,12 +32,24 @@ let find_field (field_name : string) (fields : (string * Yojson.Safe.t) list)
   | None -> failwith "No info found for this field"
 ;;
 
+let parse_author (author : Yojson.Safe.t) : Yojson.Safe.t =
+  match author with
+  | `Assoc fields -> find_field "name" fields
+  | _ -> failwith "Not properly formatted author field"
+;;
+
 let make_book_from_json (book_info : Yojson.Safe.t) =
   match book_info with
   | `Assoc fields ->
     let key = find_field "key" fields in
     let title = find_field "title" fields in
-    (* let author = find_field "author" fields in *)
+    let author =
+      List.find_map fields ~f:(fun (name, author) ->
+        if String.equal name "author"
+        then
+          Some (format_field (Yojson.Safe.to_string (parse_author author)))
+        else None)
+    in
     let isbn =
       List.find_map fields ~f:(fun (name, isbn) ->
         if String.equal name "isbn"
@@ -53,7 +65,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
     in
     Book.create
       ~title:(format_field (Yojson.Safe.to_string title))
-      ~author:(Some (format_field ""))
+      ~author
       ~key:(format_field (Yojson.Safe.to_string key))
       ~isbn:
         (match isbn with
@@ -95,7 +107,13 @@ module Book_page = struct
     | `Assoc fields ->
       let key = find_field "key" fields in
       let title = find_field "title" fields in
-      (*let author = find_field "author" fields in*)
+      let author =
+        List.find_map fields ~f:(fun (name, author) ->
+          if String.equal name "author"
+          then
+            Some (format_field (Yojson.Safe.to_string (parse_author author)))
+          else None)
+      in
       let isbn =
         List.find_map fields ~f:(fun (name, isbn) ->
           if String.equal name "isbn"
@@ -104,12 +122,11 @@ module Book_page = struct
           else None)
       in
       let subjects =
-        (* List.sub ~pos:0 ~len:5 *)
         make_subject_list_from_json (find_field "subjects" fields)
       in
       Book.create
         ~title:(format_field (Yojson.Safe.to_string title))
-        ~author:(Some (format_field ""))
+        ~author
         ~key:(format_field (Yojson.Safe.to_string key))
         ~isbn:
           (match isbn with
