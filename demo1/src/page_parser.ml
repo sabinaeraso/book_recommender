@@ -24,7 +24,7 @@ let subject_is_valid ~subject =
     ; "general"
     ; "ficti"
     ; "read"
-    ; "literatur"
+    ; "litera"
     ; "juvenile"
     ; "nyt"
     ; "bestseller"
@@ -33,6 +33,9 @@ let subject_is_valid ~subject =
     ; "medal"
     ; "collection"
     ; "amerikanisches englisch"
+    ; "new york times"
+    ; "electronic book"
+    ; "ebook"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->
