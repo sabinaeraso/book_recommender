@@ -46,13 +46,15 @@ let update_to_visit_from_subject ~(state : State.t) ~subject =
     let books = Page_parser.Subject_page.parse_books books_raw in
     List.iter books ~f:(fun (book : Book.t) ->
       let key = Book.key book in
-      book.heuristic <- book.heuristic - 1;
-      if not
-           (List.exists visited_books ~f:(fun k ->
-              equal 0 (Book.Key.compare k key)))
-      then (
-        let index = Book.Binary_heap.find_index to_visit ~key in
-        Book.Binary_heap.remove_and_leave_updated_at_top book to_visit index)))
+      match Hashtbl.find (Book.Binary_heap.index_map to_visit) key with
+      | Some index ->
+        book.heuristic <- book.heuristic - 1;
+        Book.Binary_heap.remove_and_leave_updated_at_top book to_visit index
+      | None ->
+        if not
+             (List.exists visited_books ~f:(fun k ->
+                equal 0 (Book.Key.compare k key)))
+        then Book.Binary_heap.add to_visit book))
 ;;
 
 let%expect_test "Get books from subject: Fantasy_fiction" =

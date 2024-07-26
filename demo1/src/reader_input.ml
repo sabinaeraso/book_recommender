@@ -104,7 +104,8 @@ let get_user_response (state : Book_recommender.State.t) =
         (current_title
          ^ "\n"
          ^ author_name
-         (* ^ "\n" ^ Int.to_string current_book.heuristic *)
+         ^ "\n"
+         ^ Int.to_string current_book.heuristic
          ^ "\n"
          ^ description
          ^ "\n")
