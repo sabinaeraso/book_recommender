@@ -19,9 +19,17 @@ let subject_is_valid ~subject =
   let banned_keywords =
     [ "translation"
     ; "interpretation"
-    ; "language material"
+    ; "language"
     ; "large type books"
     ; "general"
+    ; "ficti"
+    ; "read"
+    ; "literatur"
+    ; "juvenile"
+    ; "nyt"
+    ; "bestseller"
+    ; "winner"
+    ; "picks"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->
