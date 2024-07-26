@@ -173,7 +173,11 @@ module Book_page = struct
     match parsed with
     | `Assoc fields ->
       let desc = find_field "description" fields in
-      Yojson.Safe.to_string desc
+      (match desc with
+       | `Assoc desc_map ->
+         format_field (Yojson.Safe.to_string (find_field "value" desc_map))
+       | `String desc_string -> format_field desc_string
+       | _ -> failwith "Description in Open Library not properly formatted")
     | _ -> failwith "Was not a properly formatted JSON file"
   ;;
 end
