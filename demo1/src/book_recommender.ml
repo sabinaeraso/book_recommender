@@ -55,7 +55,7 @@ let update_to_visit_from_subject ~(state : State.t) ~subject =
           let array = Book.Binary_heap.data to_visit in
           let instance = Array.get array index in
           instance.heuristic <- instance.heuristic - 1;
-          Book.Binary_heap.remove_and_leave_updated_at_top
+          Book.Binary_heap.heapify_after_update_at_index
             instance
             to_visit
             index
@@ -115,7 +115,7 @@ let%expect_test "Remove and Leave Updated at Top" =
   let index = Book.Binary_heap.find_index heap ~key:book_four.key in
   print_s [%message (heap : Book.Binary_heap.t)];
   book_four.heuristic <- 1;
-  Book.Binary_heap.remove_and_leave_updated_at_top book_four heap index;
+  Book.Binary_heap.heapify_after_update_at_index book_four heap index;
   printf "New heap:";
   print_s [%message (heap : Book.Binary_heap.t)]
 ;;

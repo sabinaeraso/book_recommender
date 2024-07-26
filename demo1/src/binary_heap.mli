@@ -34,7 +34,7 @@ module type S = sig
   val add : t -> Value.t -> unit
 
   val find_index : t -> key:string -> int
-  val remove_and_leave_updated_at_top : Value.t -> t -> int -> unit
+  val heapify_after_update_at_index : Value.t -> t -> int -> unit
   (** [minimum h] returns the minimum element of [h]; raises [Empty]
       when [h] is empty; complexity O(1) *)
   val minimum : t -> Value.t
