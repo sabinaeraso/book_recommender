@@ -4,6 +4,7 @@ module type Ordered = sig
   type t [@@deriving sexp]
 
   val compare : t -> t -> int
+  val key: t -> string
 end
 
 exception Empty
@@ -26,13 +27,18 @@ module type S = sig
 
   (** [is_empty h] checks the emptiness of [h] *)
   val is_empty : t -> bool
+  val index_map : t -> int Core.String.Table.t
 
   (** [add x h] adds a new element [x] in heap [h]; complexity O(log(n)). *)
   val add : t -> Value.t -> unit
 
+  val find_index : t -> key:string -> int
+  val remove_and_leave_updated_at_top : Value.t -> t -> int -> unit
   (** [minimum h] returns the minimum element of [h]; raises [Empty]
       when [h] is empty; complexity O(1) *)
   val minimum : t -> Value.t
+
+  val movedown : t -> int -> int -> Value.t -> unit
 
   (** [remove h] removes the minimum element of [h]; raises [Empty]
       when [h] is empty; complexity O(log(n)). *)
