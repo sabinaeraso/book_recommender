@@ -22,6 +22,7 @@ module type S = sig
       Note: [dummy] can still be used as a regular value in the queue. *)
   val create : dummy:Value.t -> int -> t
 
+  val data : t -> Value.t array
   (** [length h] returns the number of elements of [h] *)
   val length : t -> int
 

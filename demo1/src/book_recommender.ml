@@ -45,16 +45,18 @@ let update_to_visit_from_subject ~(state : State.t) ~subject =
     in
     let books = Page_parser.Subject_page.parse_books books_raw in
     List.iter books ~f:(fun (book : Book.t) ->
-      let key = Book.key book in
+      let key = book.key in
       if not
            (List.exists visited_books ~f:(fun k ->
               equal 0 (Book.Key.compare k key)))
       then (
         match Hashtbl.find (Book.Binary_heap.index_map to_visit) key with
         | Some index ->
-          book.heuristic <- book.heuristic - 1;
+          let array = Book.Binary_heap.data to_visit in
+          let instance = Array.get array index in
+          instance.heuristic <- instance.heuristic - 1;
           Book.Binary_heap.remove_and_leave_updated_at_top
-            book
+            instance
             to_visit
             index
         | None -> Book.Binary_heap.add to_visit book)))

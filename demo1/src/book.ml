@@ -21,14 +21,7 @@ let print book = Core.printf !{|Title: %{sexp:Title.t}
 |} book.title
 
 let create ~title ~author ~key ~subjects ~isbn =
-  { title
-  ; author
-  ; key
-  ; subjects
-  ; isbn
-  ; heuristic = Int.max_value
-  ; description = ""
-  }
+  { title; author; key; subjects; isbn; heuristic = 1000; description = "" }
 ;;
 
 let compare_by_heuristic =

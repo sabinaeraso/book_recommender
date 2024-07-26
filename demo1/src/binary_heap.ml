@@ -22,6 +22,9 @@ module type S = sig
       Note: [dummy] can still be used as a regular value in the queue. *)
   val create : dummy:Value.t -> int -> t
 
+
+  val data : t -> Value.t array
+
   (** [length h] returns the number of elements of [h] *)
   val length : t -> int
 
@@ -87,6 +90,8 @@ module Make (X : Ordered) = struct
     ; min_cap = n
     }
   ;;
+
+  let data h = h.data 
 
   let length h = h.size
   let is_empty h = h.size = 0
