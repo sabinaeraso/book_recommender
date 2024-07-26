@@ -50,7 +50,9 @@ let update_to_visit_from_subject ~(state : State.t) ~subject =
       if not
            (List.exists visited_books ~f:(fun k ->
               equal 0 (Book.Key.compare k key)))
-      then Book.Binary_heap.add to_visit book))
+      then (
+        let index = Book.Binary_heap.find_index to_visit ~key in
+        Book.Binary_heap.remove_and_leave_updated_at_top book to_visit index)))
 ;;
 
 let%expect_test "Get books from subject: Fantasy_fiction" =
@@ -73,5 +75,40 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
   Book.print next_book
 ;;
 
-let _calculate_heuristic = ()
-(* to implement and call in update_to_visit*)
+let%expect_test "Remove and Leave Updated at Top" =
+  let dummy =
+    Book.create ~title:"" ~author:None ~key:"" ~subjects:[] ~isbn:None
+  in
+  let book_one =
+    Book.create ~title:"1" ~author:None ~key:"1" ~subjects:[] ~isbn:None
+  in
+  book_one.heuristic <- 0;
+  let book_two =
+    Book.create ~title:"2" ~author:None ~key:"2" ~subjects:[] ~isbn:None
+  in
+  book_two.heuristic <- 2;
+  let book_three =
+    Book.create ~title:"3" ~author:None ~key:"3" ~subjects:[] ~isbn:None
+  in
+  book_three.heuristic <- 3;
+  let book_four =
+    Book.create ~title:"4" ~author:None ~key:"4" ~subjects:[] ~isbn:None
+  in
+  book_four.heuristic <- 4;
+  let book_five =
+    Book.create ~title:"5" ~author:None ~key:"5" ~subjects:[] ~isbn:None
+  in
+  book_five.heuristic <- 5;
+  let heap = Book.Binary_heap.create ~dummy 3 in
+  Book.Binary_heap.add heap book_one;
+  Book.Binary_heap.add heap book_two;
+  Book.Binary_heap.add heap book_three;
+  Book.Binary_heap.add heap book_four;
+  Book.Binary_heap.add heap book_five;
+  let index = Book.Binary_heap.find_index heap ~key:book_four.key in
+  print_s [%message (heap : Book.Binary_heap.t)];
+  book_four.heuristic <- 1;
+  Book.Binary_heap.remove_and_leave_updated_at_top book_four heap index;
+  printf "New heap:";
+  print_s [%message (heap : Book.Binary_heap.t)]
+;;

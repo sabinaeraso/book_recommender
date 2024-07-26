@@ -47,6 +47,7 @@ module T = struct
   type nonrec t = t [@@deriving sexp]
 
   let compare = compare_by_heuristic
+  let key = key
 end
 
 module Binary_heap = Binary_heap.Make (T)

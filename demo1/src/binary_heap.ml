@@ -4,6 +4,7 @@ module type Ordered = sig
   type t [@@deriving sexp]
 
   val compare : t -> t -> int
+  val key : t -> string
 end
 
 exception Empty
@@ -27,13 +28,19 @@ module type S = sig
   (** [is_empty h] checks the emptiness of [h] *)
   val is_empty : t -> bool
 
+  val index_map : t -> int Core.String.Table.t
+
+
   (** [add x h] adds a new element [x] in heap [h]; complexity O(log(n)). *)
   val add : t -> Value.t -> unit
 
+  val find_index : t -> key:string -> int
+  val remove_and_leave_updated_at_top : Value.t -> t -> int -> unit
   (** [minimum h] returns the minimum element of [h]; raises [Empty]
       when [h] is empty; complexity O(1) *)
   val minimum : t -> Value.t
 
+  val movedown : t -> int -> int -> Value.t -> unit
   (** [remove h] removes the minimum element of [h]; raises [Empty]
       when [h] is empty; complexity O(log(n)). *)
   val remove : t -> unit
@@ -61,6 +68,7 @@ module Make (X : Ordered) = struct
 
   type t =
     { mutable size : int
+    ; index_map : int String.Table.t
     ; mutable data : X.t array
     ; dummy : X.t
     ; min_cap : int (* minimal capacity, as given initially *)
@@ -72,14 +80,24 @@ module Make (X : Ordered) = struct
   let create ~dummy n =
     if n < 0 || n > Sys.max_array_length then invalid_arg "create";
     let n = max 16 n in
-    { size = 0; data = Array.create ~len:n dummy; dummy; min_cap = n }
+    { size = 0
+    ; index_map = Hashtbl.create (module String)
+    ; data = Array.create ~len:n dummy
+    ; dummy
+    ; min_cap = n
+    }
   ;;
 
   let length h = h.size
   let is_empty h = h.size = 0
 
+let index_map h = h.index_map
+
+
+
   (* [enlarge] doubles the size of [data] *)
   let enlarge h =
+
     let n = h.size in
     assert (n > 0 && n = Array.length h.data);
     let n' = min (2 * n) Sys.max_array_length in
@@ -111,19 +129,31 @@ module Make (X : Ordered) = struct
       if i > 0 && X.compare d.(fi) x > 0
       then (
         d.(i) <- d.(fi);
+        Hashtbl.set h.index_map ~key:(X.key d.(fi)) ~data:i;
         moveup fi)
-      else d.(i) <- x
+      else (d.(i) <- x;
+      Hashtbl.set h.index_map ~key:(X.key x) ~data:i;
+      )
     in
     moveup n;
     h.size <- n + 1
   ;;
+
+  let find_index heap ~key =
+    let index_map = heap.index_map in
+    match Hashtbl.find index_map key with
+    | None -> failwith "this book is not  in the index map"
+    | Some index -> index
+  ;;
+
 
   let minimum h =
     if h.size <= 0 then raise Empty;
     h.data.(0)
   ;;
 
-  let rec movedown d n i x =
+  let rec movedown h n i x =
+    let d  = h.data in
     let j = (2 * i) + 1 in
     if j < n
     then (
@@ -134,9 +164,26 @@ module Make (X : Ordered) = struct
       if X.compare d.(j) x < 0
       then (
         d.(i) <- d.(j);
-        movedown d n j x)
-      else d.(i) <- x)
-    else d.(i) <- x
+        Hashtbl.set h.index_map ~key: (X.key (d.(j))) ~data:i ; 
+        movedown h n j x)
+      else (d.(i) <- x; 
+      Hashtbl.set h.index_map ~key: (X.key x) ~data:i ;) )
+    else (d.(i) <- x ; 
+    Hashtbl.set h.index_map ~key: (X.key x) ~data:i ;)
+  ;;
+
+  let rec remove_and_leave_updated_at_top updated_book heap index_to_move =
+    if equal 0 index_to_move
+    then ( Array.set heap.data 0 updated_book;
+    Hashtbl.set heap.index_map ~key: (X.key updated_book) ~data:0 ;
+    movedown heap (heap.size) 0 updated_book;
+     )
+    else (
+      let parent_index = (index_to_move - 1) / 2 in
+      Hashtbl.set heap.index_map ~key: (X.key (Array.get heap.data parent_index)) ~data:index_to_move ;
+      Hashtbl.set heap.index_map ~key: (X.key (Array.get heap.data index_to_move)) ~data:parent_index ;
+      Array.swap heap.data index_to_move parent_index ; 
+      remove_and_leave_updated_at_top updated_book heap parent_index)
   ;;
 
   let remove h =
@@ -146,12 +193,12 @@ module Make (X : Ordered) = struct
     let d = h.data in
     let x = d.(n) in
     d.(n) <- h.dummy;
-    movedown d n 0 x;
+    movedown h n 0 x;
     if 4 * h.size < Array.length h.data then shrink h
   ;;
 
   let remove_and_add h x =
-    if h.size = 0 then add h x else movedown h.data h.size 0 x
+    if h.size = 0 then add h x else movedown h h.size 0 x
   ;;
 
   let pop_minimum h =
