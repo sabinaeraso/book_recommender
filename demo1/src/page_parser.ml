@@ -32,6 +32,7 @@ let subject_is_valid ~subject =
     ; "picks"
     ; "medal"
     ; "collection"
+    ; "amerikanisches englisch"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->
