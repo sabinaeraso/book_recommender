@@ -28,8 +28,10 @@ let subject_is_valid ~subject =
     ; "juvenile"
     ; "nyt"
     ; "bestseller"
-    ; "winner"
+    ; "award"
     ; "picks"
+    ; "medal"
+    ; "collection"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->
