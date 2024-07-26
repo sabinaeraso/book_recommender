@@ -21,6 +21,7 @@ let subject_is_valid ~subject =
     ; "interpretation"
     ; "language material"
     ; "large type books"
+    ; "general"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->

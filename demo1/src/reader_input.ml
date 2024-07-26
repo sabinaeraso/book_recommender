@@ -54,13 +54,7 @@ let rec get_origin_book () =
     get_origin_book ()
 ;;
 
-(* in *)
-(* match valid_book with | Ok book -> book | Error _ -> print_endline "Could
-   not find book please try different title"; get_origin_book () *)
-
-let get_user_response (state : Book_recommender.State.t) =
-  let current_book = state.current_book in
-  let current_title = current_book.title in
+let get_valid_description (current_book : Book.t) =
   let valid_desc =
     Or_error.try_with (fun () ->
       Page_parser.Book_page.get_book_description
@@ -69,13 +63,38 @@ let get_user_response (state : Book_recommender.State.t) =
   let description =
     match valid_desc with
     | Ok desc -> desc
-    | Error _ -> "No Description Found"
+    | Error _ ->
+      let google_desc =
+        Or_error.try_with (fun () ->
+          Google_api.Parser.get_description_from_search_json
+            (Google_api.Fetcher.search_book_by_name current_book.title))
+      in
+      (match google_desc with
+       | Ok desc -> "Google desc: " ^ desc
+       | Error _ -> "No Description Found")
   in
-  let author_name =
-    match current_book.author with
-    | Some name -> name
-    | None -> "No author found"
-  in
+  description
+;;
+
+let get_author_name (current_book : Book.t) =
+  match current_book.author with
+  | Some name -> name
+  | None ->
+    let google_authors =
+      Or_error.try_with (fun () ->
+        Google_api.Parser.get_authors_from_search_json
+          (Google_api.Fetcher.search_book_by_name current_book.title))
+    in
+    (match google_authors with
+     | Ok desc -> "Google author(s): " ^ desc
+     | Error _ -> "No Author Found")
+;;
+
+let get_user_response (state : Book_recommender.State.t) =
+  let current_book = state.current_book in
+  let current_title = current_book.title in
+  let description = get_valid_description current_book in
+  let author_name = get_author_name current_book in
   let open Deferred.Let_syntax in
   let%bind response =
     pick_one
