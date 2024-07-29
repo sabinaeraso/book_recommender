@@ -40,7 +40,9 @@ let update_to_visit_from_subject
   let visited_books = state.visited_books in
   let visited_subjects = state.visited_subjects in
   let to_visit = state.to_visit in
-  if not (List.exists visited_subjects ~f:(fun s -> String.equal s subject))
+  if not
+       (List.exists visited_subjects ~f:(fun s ->
+          String.equal (String.lowercase s) (String.lowercase subject)))
   then (
     (*print_endline subject;*)
     state.visited_subjects <- List.append state.visited_subjects [ subject ];
