@@ -1,6 +1,6 @@
 open! Core
 
-let handle_yes ~(state : Book_recommender.State.t) =
+let handle_yes heuristic_change ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited_books <- List.append state.visited_books [ book.key ];
   state.recommendations <- List.append state.recommendations [ book ];
@@ -8,7 +8,10 @@ let handle_yes ~(state : Book_recommender.State.t) =
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
       Or_error.try_with (fun () ->
-        Book_recommender.update_to_visit_from_subject ~state ~subject)
+        Book_recommender.update_to_visit_from_subject
+          heuristic_change
+          ~state
+          ~subject)
     in
     match valid_subject with Ok _ -> () | Error _ -> ());
   let next_book = Book_recommender.get_next_book ~state in
@@ -22,14 +25,17 @@ let handle_no ~(state : Book_recommender.State.t) =
   state.current_book <- next_book
 ;;
 
-let handle_read_yes ~(state : Book_recommender.State.t) =
+let handle_read_yes heuristic_change ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited_books <- List.append state.visited_books [ book.key ];
   let subjects = book.subjects in
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
       Or_error.try_with (fun () ->
-        Book_recommender.update_to_visit_from_subject ~state ~subject)
+        Book_recommender.update_to_visit_from_subject
+          heuristic_change
+          ~state
+          ~subject)
     in
     match valid_subject with Ok _ -> () | Error _ -> ());
   let next_book = Book_recommender.get_next_book ~state in
