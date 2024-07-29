@@ -44,6 +44,8 @@ let subject_is_valid ~subject =
     ; "large print books"
     ; "lexile"
     ; "roman pour"
+    ; "romans, nouvelles"
+    ; "813/.54"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->

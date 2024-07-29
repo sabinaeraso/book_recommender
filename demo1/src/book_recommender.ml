@@ -42,10 +42,10 @@ let update_to_visit_from_subject
   let to_visit = state.to_visit in
   if not (List.exists visited_subjects ~f:(fun s -> String.equal s subject))
   then (
-    (*print_endline subject;*)
+    print_endline subject;
     state.visited_subjects <- List.append state.visited_subjects [ subject ];
     let books_raw =
-      Book_fetch.Fetcher.Subjects.fetch_sub subject ~limit:100
+      Book_fetch.Fetcher.Subjects.fetch_sub subject ~limit:200
     in
     let books = Page_parser.Subject_page.parse_books books_raw in
     List.iter books ~f:(fun (book : Book.t) ->
