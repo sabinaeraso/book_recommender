@@ -30,7 +30,7 @@ type t =
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
-  ; mutable heuristic : int
+  ; mutable heuristic : float
   ; mutable description : string
   }
 [@@deriving sexp, compare]
@@ -52,6 +52,6 @@ val isbn : t -> Isbn.t option
 val subjects : t -> Subject.t list
 val key : t -> Key.t
 val title : t -> Title.t
-val heuristic : t -> int
+val heuristic : t -> float
 
 module Binary_heap : Binary_heap.S with type Value.t = t

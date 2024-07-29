@@ -12,7 +12,7 @@ type t =
   ; key : Key.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
-  ; mutable heuristic : int
+  ; mutable heuristic : float
   ; mutable description : Description.t
   }
 [@@deriving sexp, compare]
@@ -21,11 +21,11 @@ let print book = Core.printf !{|Title: %{sexp:Title.t}
 |} book.title
 
 let create ~title ~author ~key ~subjects ~isbn =
-  { title; author; key; subjects; isbn; heuristic = 1000; description = "" }
+  { title; author; key; subjects; isbn; heuristic = 10.0; description = "" }
 ;;
 
 let compare_by_heuristic =
-  Comparable.lift Int.compare ~f:(fun book -> book.heuristic)
+  Comparable.lift Float.compare ~f:(fun book -> book.heuristic)
 ;;
 
 let subjects t = t.subjects

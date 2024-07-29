@@ -105,7 +105,7 @@ let get_user_response (state : Book_recommender.State.t) =
          ^ "\n"
          ^ author_name
          ^ "\n"
-         ^ Int.to_string current_book.heuristic
+         ^ Float.to_string current_book.heuristic
          ^ "\n"
          ^ description
          ^ "\n")
@@ -115,21 +115,21 @@ let get_user_response (state : Book_recommender.State.t) =
   | Some message -> return message
 ;;
 
-let rec run_recommender (state : Book_recommender.State.t) =
+let rec run_recommender (n : float) (state : Book_recommender.State.t) =
   let%bind response = get_user_response state in
   match response with
   | Message.Interested ->
-    Handle.handle_yes ~state;
-    run_recommender state
+    Handle.handle_yes n ~state;
+    run_recommender (n +. 1.0) state
   | Not_Interested ->
     Handle.handle_no ~state;
-    run_recommender state
+    run_recommender (n +. 1.0) state
   | Read_liked ->
-    Handle.handle_read_yes ~state;
-    run_recommender state
+    Handle.handle_read_yes n ~state;
+    run_recommender (n +. 1.0) state
   | Read_didnt_like ->
     Handle.handle_read_no ~state;
-    run_recommender state
+    run_recommender (n +. 1.0) state
   | Done -> return (Handle.handle_done ~state)
 ;;
 
@@ -140,8 +140,8 @@ let run () =
   let%bind origin_book = get_origin_book () in
   let state = Book_recommender.State.empty_state in
   state.current_book <- origin_book;
-  Handle.handle_read_yes ~state;
-  run_recommender state
+  Handle.handle_read_yes 1.0 ~state;
+  run_recommender 2.0 state
 ;;
 
 let run_command =
