@@ -18,6 +18,7 @@ module State = struct
         ~key:"Key"
         ~subjects:[]
         ~isbn:(Some 1)
+        ~publish_date:None
     in
     let state =
       { visited_books = []
@@ -91,26 +92,62 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
 
 let%expect_test "Remove and Leave Updated at Top" =
   let dummy =
-    Book.create ~title:"" ~author:None ~key:"" ~subjects:[] ~isbn:None
+    Book.create
+      ~title:""
+      ~author:None
+      ~key:""
+      ~subjects:[]
+      ~isbn:None
+      ~publish_date:None
   in
   let book_one =
-    Book.create ~title:"1" ~author:None ~key:"1" ~subjects:[] ~isbn:None
+    Book.create
+      ~title:"1"
+      ~author:None
+      ~key:"1"
+      ~subjects:[]
+      ~isbn:None
+      ~publish_date:None
   in
   book_one.heuristic <- 0.0;
   let book_two =
-    Book.create ~title:"2" ~author:None ~key:"2" ~subjects:[] ~isbn:None
+    Book.create
+      ~title:"2"
+      ~author:None
+      ~key:"2"
+      ~subjects:[]
+      ~isbn:None
+      ~publish_date:None
   in
   book_two.heuristic <- 2.0;
   let book_three =
-    Book.create ~title:"3" ~author:None ~key:"3" ~subjects:[] ~isbn:None
+    Book.create
+      ~title:"3"
+      ~author:None
+      ~key:"3"
+      ~subjects:[]
+      ~isbn:None
+      ~publish_date:None
   in
   book_three.heuristic <- 3.0;
   let book_four =
-    Book.create ~title:"4" ~author:None ~key:"4" ~subjects:[] ~isbn:None
+    Book.create
+      ~title:"4"
+      ~author:None
+      ~key:"4"
+      ~subjects:[]
+      ~isbn:None
+      ~publish_date:None
   in
   book_four.heuristic <- 4.0;
   let book_five =
-    Book.create ~title:"5" ~author:None ~key:"5" ~subjects:[] ~isbn:None
+    Book.create
+      ~title:"5"
+      ~author:None
+      ~key:"5"
+      ~subjects:[]
+      ~isbn:None
+      ~publish_date:None
   in
   book_five.heuristic <- 5.0;
   let heap = Book.Binary_heap.create ~dummy 3 in

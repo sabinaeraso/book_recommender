@@ -24,6 +24,10 @@ module Description : sig
   type t = string [@@deriving sexp, compare, hash]
 end
 
+module Publish_Date : sig
+  type t = int [@@deriving sexp, compare, hash]
+end
+
 type t =
   { title : Title.t
   ; author : Author.t option
@@ -32,6 +36,7 @@ type t =
   ; subjects : Subject.t list
   ; mutable heuristic : float
   ; mutable description : string
+  ; publish_date : Publish_Date.t option
   }
 [@@deriving sexp, compare]
 
@@ -42,6 +47,7 @@ val create
   -> key:string
   -> subjects:string list
   -> isbn:int option
+  -> publish_date:int option
   -> t
 
 (* prints the title and Open Library key of a book*)

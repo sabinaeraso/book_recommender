@@ -95,6 +95,11 @@ let get_user_response (state : Book_recommender.State.t) =
   let current_title = current_book.title in
   let description = get_valid_description current_book in
   let author_name = get_author_name current_book in
+  let published =
+    match current_book.publish_date with
+    | None -> "No publish date"
+    | Some date -> Int.to_string date
+  in
   let open Deferred.Let_syntax in
   let%bind response =
     pick_one
@@ -108,6 +113,8 @@ let get_user_response (state : Book_recommender.State.t) =
          ^ Float.to_string current_book.heuristic
          ^ "\n"
          ^ description
+         ^ "\n"
+         ^ published
          ^ "\n")
   in
   match ok_exn response with

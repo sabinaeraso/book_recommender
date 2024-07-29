@@ -7,12 +7,8 @@ let format_field (str : string) =
   String.split_on_chars str ~on:[ '\\'; '\"' ] |> String.concat
 ;;
 
-(* let format_field_ascii (str : string) = String.split_on_chars str ~on:[
-   '\\'; '\"' ] |> List.map ~f:(fun s -> (String.to_list s)) |> List.map
-   ~f:(fun c -> Stdlib.Uchar.of_char c) |> Stdlib.Uchar. |> String.concat
-   ;; *)
-let _format_field_subjects (str : string) =
-  String.split_on_chars str ~on:[ '\\'; '\"'; '/' ] |> String.concat
+let format_field_year (str : string) =
+  String.split_on_chars str ~on:[ '\\'; '\"'; '/'; ',' ] |> String.concat
 ;;
 
 let subject_is_valid ~subject =
@@ -77,6 +73,14 @@ let find_field (field_name : string) (fields : (string * Yojson.Safe.t) list)
   | None -> failwith "No info found for this field"
 ;;
 
+let find_field_option
+  (field_name : string)
+  (fields : (string * Yojson.Safe.t) list)
+  =
+  List.find_map fields ~f:(fun (name, key) ->
+    if String.equal name field_name then Some key else None)
+;;
+
 let parse_author (authors : Yojson.Safe.t) : Yojson.Safe.t =
   match authors with
   | `List author_list ->
@@ -89,7 +93,18 @@ let parse_author (authors : Yojson.Safe.t) : Yojson.Safe.t =
   | _ -> failwith "Not properly formatted author field"
 ;;
 
-let make_book_from_json (book_info : Yojson.Safe.t) =
+let get_publish_year (fields : (string * Yojson.Safe.t) list) =
+  match find_field_option "first_publish_year" fields with
+  | None -> None
+  | Some year ->
+    let date =
+      Or_error.try_with (fun () ->
+        Int.of_string (format_field_year (Yojson.Safe.to_string year)))
+    in
+    (match date with Ok da -> Some da | Error _ -> None)
+;;
+
+let make_book_from_json (book_info : Yojson.Safe.t) : Book.t =
   match book_info with
   | `Assoc fields ->
     let key = find_field "key" fields in
@@ -101,6 +116,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
           Some (format_field (Yojson.Safe.to_string (parse_author author)))
         else None)
     in
+    let publish_date = get_publish_year fields in
     let isbn =
       List.find_map fields ~f:(fun (name, isbn) ->
         if String.equal name "isbn"
@@ -124,11 +140,12 @@ let make_book_from_json (book_info : Yojson.Safe.t) =
          | Some num ->
            Some (Int.of_string (format_field (Yojson.Safe.to_string num))))
       ~subjects
+      ~publish_date
   | _ -> failwith "Was not properly formatted"
 ;;
 
 module Subject_page = struct
-  let make_book_list (works_list : Yojson.Safe.t) =
+  let make_book_list (works_list : Yojson.Safe.t) : Book.t list =
     match works_list with
     | `List all_works -> List.map all_works ~f:make_book_from_json
     | _ -> failwith "Works not properly formatted"
@@ -147,7 +164,7 @@ module Subject_page = struct
     | _ -> failwith "Not a valid formatted page"
   ;;
 
-  let parse_books (raw_page : string) =
+  let parse_books (raw_page : string) : Book.t list =
     get_works_list (parse_from_string raw_page)
   ;;
 end
@@ -165,6 +182,7 @@ module Book_page = struct
             Some (format_field (Yojson.Safe.to_string (parse_author author)))
           else None)
       in
+      let publish_date = get_publish_year fields in
       let isbn =
         List.find_map fields ~f:(fun (name, isbn) ->
           if String.equal name "isbn"
@@ -185,6 +203,7 @@ module Book_page = struct
            | Some num ->
              Some (Int.of_string (format_field (Yojson.Safe.to_string num))))
         ~subjects
+        ~publish_date
     | _ -> failwith "Was not properly formatted"
   ;;
 
@@ -224,7 +243,7 @@ module Search_page = struct
     | _ -> failwith "Returned page not formatted correctly"
   ;;
 
-  let parse_searches (raw_page : string) =
+  let parse_searches (raw_page : string) : Book.t =
     get_most_relevant_book (parse_from_string raw_page)
   ;;
 end
