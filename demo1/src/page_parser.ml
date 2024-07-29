@@ -36,6 +36,8 @@ let subject_is_valid ~subject =
     ; "new york times"
     ; "electronic book"
     ; "ebook"
+    ; "classics"
+    ; "er tong wen xue"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->
