@@ -16,9 +16,5 @@ val handle_no : state:Book_recommender.State.t -> unit
    generate a new book and print it out. *)
 val handle_read_yes : float -> state:Book_recommender.State.t -> unit
 
-(* They are not interested. Add the current book to visited and update the
-   state with these new lists. Generate a new book and print it out. *)
-(*val handle_read_no : state:Book_recommender.State.t -> unit *)
-
 (* They dont want to see any more books. Print out their recommended books.*)
 val handle_done : state:Book_recommender.State.t -> unit
