@@ -97,12 +97,16 @@ module Parser = struct
   ;;
 
   let get_authors_from_vol_info raw_page =
-    match Page_parser.find_field "authors" raw_page with
-    | `List author_list ->
-      List.map author_list ~f:(fun author ->
-        Page_parser.format_field (Yojson.Safe.to_string author))
-      |> String.concat ~sep:", "
-    | _ -> failwith "authors not properly formatted"
+    match Page_parser.find_field_option "authors" raw_page with
+    | None -> None
+    | Some authors ->
+      (match authors with
+       | `List author_list ->
+         Some
+           (List.map author_list ~f:(fun author ->
+              Page_parser.format_field (Yojson.Safe.to_string author))
+            |> String.concat ~sep:", ")
+       | _ -> failwith "authors not properly formatted")
   ;;
 
   let get_isbn_from_vol_info raw_page =
@@ -128,7 +132,7 @@ module Parser = struct
          let title =
            to_string_and_format (Page_parser.find_field "title" info_map)
          in
-         let authors = Some (get_authors_from_vol_info info_map) in
+         let author = get_authors_from_vol_info info_map in
          let publish_date =
            Some
              (Int.of_string
@@ -139,13 +143,7 @@ module Parser = struct
                    4))
          in
          let isbn = get_isbn_from_vol_info info_map in
-         Book.create
-           ~title
-           ~key:id
-           ~isbn
-           ~author:authors
-           ~subjects:[]
-           ~publish_date
+         Book.create ~title ~key:id ~isbn ~author ~subjects:[] ~publish_date
        | _ -> failwith "Info in volumeinfo not formatted properly")
     | _ -> failwith "book field not properly formatted"
   ;;
