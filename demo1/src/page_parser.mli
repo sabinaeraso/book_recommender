@@ -1,6 +1,12 @@
 open! Core
 
 val find_field : string -> (string * Yojson.Safe.t) list -> Yojson.Safe.t
+
+val find_field_option
+  :  string
+  -> (string * Yojson.Safe.t) list
+  -> Yojson.Safe.t option
+
 val format_field : string -> string
 
 module Subject_page : sig

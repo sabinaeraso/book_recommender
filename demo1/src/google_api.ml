@@ -15,6 +15,10 @@ module Fetcher = struct
     prefix ^ "?q=" ^ format_name name
   ;;
 
+  let create_subject_search_url ?(maxResults = 40) (name : string) =
+    prefix ^ "?q=subject:" ^ name ^ "&maxResults=" ^ string_of_int maxResults
+  ;;
+
   let fetch_book_by_id id =
     File_fetcher.fetch_exn Remote ~resource:(get_book_volume_url id)
   ;;
@@ -23,11 +27,27 @@ module Fetcher = struct
     File_fetcher.fetch_exn Remote ~resource:(create_search_volumes_url name)
   ;;
 
+  let search_by_subject ?(maxResults : int option) name =
+    match maxResults with
+    | None ->
+      File_fetcher.fetch_exn
+        Remote
+        ~resource:(create_subject_search_url name)
+    | Some maxResults ->
+      File_fetcher.fetch_exn
+        Remote
+        ~resource:(create_subject_search_url name ~maxResults)
+  ;;
+
   let fetch_by_self_link link = File_fetcher.fetch_exn Remote ~resource:link
 end
 
 module Parser = struct
   let parse_from_string (page : string) = Yojson.Safe.from_string page
+
+  let to_string_and_format (json : Yojson.Safe.t) =
+    Page_parser.format_field (Yojson.Safe.to_string json)
+  ;;
 
   let get_entry_type_from_search raw_page (entry : string) =
     let page_json = parse_from_string raw_page in
@@ -63,6 +83,63 @@ module Parser = struct
           | _ -> failwith "entries not formatted well in item entry")
        | _ -> failwith "items entries not formatted well")
     | _ -> failwith "not proper google api page"
+  ;;
+
+  let get_all_books_from_subject raw_page : Yojson.Safe.t list =
+    let page_json = parse_from_string raw_page in
+    match page_json with
+    | `Assoc page ->
+      let items = Page_parser.find_field "items" page in
+      (match items with
+       | `List item_list -> item_list
+       | _ -> failwith "items entries not formatted well")
+    | _ -> failwith "not proper google api page"
+  ;;
+
+  let get_authors_from_vol_info raw_page =
+    match Page_parser.find_field "authors" raw_page with
+    | `List author_list ->
+      List.map author_list ~f:(fun author ->
+        Page_parser.format_field (Yojson.Safe.to_string author))
+      |> String.concat ~sep:", "
+    | _ -> failwith "authors not properly formatted"
+  ;;
+
+  let get_isbn_from_vol_info raw_page =
+    match Page_parser.find_field "industryIdentifiers" raw_page with
+    | `List isbn_list ->
+      (match List.hd_exn isbn_list with
+       | `Assoc isbn_map ->
+         (match Page_parser.find_field_option "identifier" isbn_map with
+          | Some isbn -> Some (Int.of_string (to_string_and_format isbn))
+          | _ -> None)
+       | _ -> None)
+    | _ -> failwith "isbn not properly formatted"
+  ;;
+
+  let make_book_from_book_json (raw_book : Yojson.Safe.t) =
+    match raw_book with
+    | `Assoc book_map ->
+      let id = to_string_and_format (Page_parser.find_field "id" book_map) in
+      let vol_info = Page_parser.find_field "volumeInfo" book_map in
+      (match vol_info with
+       | `Assoc info_map ->
+         let title =
+           to_string_and_format (Page_parser.find_field "title" info_map)
+         in
+         let authors = Some (get_authors_from_vol_info info_map) in
+         let publish_date =
+           to_string_and_format
+             (Page_parser.find_field "publishedDate" info_map)
+         in
+         let isbn = get_isbn_from_vol_info info_map in
+         Book.create ~title ~key:id ~isbn ~author:authors ~subjects:[]
+       | _ -> failwith "Info in volumeinfo not formatted properly")
+    | _ -> failwith "book field not properly formatted"
+  ;;
+
+  let make_books_list (raw_book_info : Yojson.Safe.t list) =
+    List.map raw_book_info ~f:(fun book -> make_book_from_book_json)
   ;;
 
   let get_book_id_from_search_json raw_page =
