@@ -111,7 +111,8 @@ module Parser = struct
       (match List.hd_exn isbn_list with
        | `Assoc isbn_map ->
          (match Page_parser.find_field_option "identifier" isbn_map with
-          | Some isbn -> Some (Int.of_string (to_string_and_format isbn))
+          (* | Some isbn -> Some (Int.of_string (to_string_and_format
+             isbn)) *)
           | _ -> None)
        | _ -> None)
     | _ -> failwith "isbn not properly formatted"
@@ -129,17 +130,33 @@ module Parser = struct
          in
          let authors = Some (get_authors_from_vol_info info_map) in
          let publish_date =
-           to_string_and_format
-             (Page_parser.find_field "publishedDate" info_map)
+           Some
+             (Int.of_string
+                (String.slice
+                   (to_string_and_format
+                      (Page_parser.find_field "publishedDate" info_map))
+                   0
+                   4))
          in
          let isbn = get_isbn_from_vol_info info_map in
-         Book.create ~title ~key:id ~isbn ~author:authors ~subjects:[]
+         Book.create
+           ~title
+           ~key:id
+           ~isbn
+           ~author:authors
+           ~subjects:[]
+           ~publish_date
        | _ -> failwith "Info in volumeinfo not formatted properly")
     | _ -> failwith "book field not properly formatted"
   ;;
 
   let make_books_list (raw_book_info : Yojson.Safe.t list) =
-    List.map raw_book_info ~f:(fun book -> make_book_from_book_json)
+    List.map raw_book_info ~f:(fun book -> make_book_from_book_json book)
+  ;;
+
+  let get_books_from_subject_search (raw_string : string) =
+    let items = get_all_books_from_subject raw_string in
+    make_books_list items
   ;;
 
   let get_book_id_from_search_json raw_page =
@@ -241,6 +258,21 @@ let find_book_authors =
         print_s [%sexp (fetched_file : string)]]
 ;;
 
+let find_book_by_subject =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:
+      "Given a subject, tries to find and make all books using Google API"
+    [%map_open
+      let name = flag "name" (required string) ~doc:"The subject name" in
+      fun () ->
+        let fetched_file =
+          Parser.get_books_from_subject_search
+            (Fetcher.search_by_subject name)
+        in
+        print_s [%sexp (fetched_file : Book.t list)]]
+;;
+
 let command =
   Command.group
     ~summary:"Allows for using the Google Api to get info"
@@ -248,5 +280,6 @@ let command =
     ; "cover-by-name", find_image_link
     ; "description-by-name", find_book_description
     ; "authors-by-name", find_book_authors
+    ; "books-of-subject", find_book_by_subject
     ]
 ;;

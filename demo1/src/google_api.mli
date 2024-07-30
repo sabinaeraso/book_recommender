@@ -3,9 +3,11 @@ open! Core
 module Fetcher : sig
   val fetch_book_by_id : string -> string
   val search_book_by_name : string -> string
+  val search_by_subject : ?maxResults:int -> string -> string
 end
 
 module Parser : sig
+  val get_books_from_subject_search : string -> Book.t list
   val get_book_id_from_search_json : string -> string
   val get_description_from_search_json : string -> string
   val get_authors_from_search_json : string -> string
