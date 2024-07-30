@@ -18,13 +18,6 @@ let handle_yes heuristic_change ~(state : Book_recommender.State.t) =
   state.current_book <- next_book
 ;;
 
-let handle_no ~(state : Book_recommender.State.t) =
-  let book = state.current_book in
-  state.visited_books <- List.append state.visited_books [ book.key ];
-  let next_book = Book_recommender.get_next_book ~state in
-  state.current_book <- next_book
-;;
-
 let handle_read_yes heuristic_change ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited_books <- List.append state.visited_books [ book.key ];
@@ -42,12 +35,18 @@ let handle_read_yes heuristic_change ~(state : Book_recommender.State.t) =
   state.current_book <- next_book
 ;;
 
-let handle_read_no ~(state : Book_recommender.State.t) =
+let handle_no ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   state.visited_books <- List.append state.visited_books [ book.key ];
   let next_book = Book_recommender.get_next_book ~state in
   state.current_book <- next_book
 ;;
+
+(* let handle_read_no ~(state : Book_recommender.State.t) = let book =
+   state.current_book in state.visited_books <- List.append
+   state.visited_books [ book.key ]; let next_book =
+   Book_recommender.get_next_book ~state in state.current_book <- next_book
+   ;; *)
 
 let handle_done ~(state : Book_recommender.State.t) =
   let recs = state.recommendations in

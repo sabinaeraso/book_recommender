@@ -101,47 +101,46 @@ let index_map h = h.index_map
 
 
   (* [enlarge] doubles the size of [data] *)
-  let enlarge h =
-
-    let n = h.size in
-    assert (n > 0 && n = Array.length h.data);
+  let enlarge heap =
+    let n = heap.size in
+    assert (n > 0 && n = Array.length heap.data);
     let n' = min (2 * n) Sys.max_array_length in
     if n' = n then failwith "maximum capacity reached";
-    let d = h.data in
-    let d' = Array.create ~len:n' h.dummy in
+    let d = heap.data in
+    let d' = Array.create ~len:n' heap.dummy in
     Array.blit ~src:d ~src_pos:0 ~dst:d' ~dst_pos:0 ~len:n;
-    h.data <- d'
+    heap.data <- d'
   ;;
 
-  let shrink h =
-    let n = Array.length h.data in
-    let n' = max h.min_cap (n / 2) in
-    assert (h.size <= n' && n' <= n);
+  let shrink heap =
+    let n = Array.length heap.data in
+    let n' = max heap.min_cap (n / 2) in
+    assert (heap.size <= n' && n' <= n);
     if n' < n
     then (
-      let d = h.data in
-      let d' = Array.create ~len:n' h.dummy in
-      Array.blit ~src:d ~src_pos:0 ~dst:d' ~dst_pos:0 ~len:h.size;
-      h.data <- d')
+      let d = heap.data in
+      let d' = Array.create ~len:n' heap.dummy in
+      Array.blit ~src:d ~src_pos:0 ~dst:d' ~dst_pos:0 ~len:heap.size;
+      heap.data <- d')
   ;;
 
-  let add h x =
-    let n = h.size in
-    if equal n (Array.length h.data) then enlarge h;
-    let d = h.data in
+  let add heap x =
+    let n = heap.size in
+    if equal n (Array.length heap.data) then enlarge heap;
+    let d = heap.data in
     let rec moveup i =
       let fi = (i - 1) / 2 in
       if i > 0 && X.compare d.(fi) x > 0
       then (
         d.(i) <- d.(fi);
-        Hashtbl.set h.index_map ~key:(X.key d.(fi)) ~data:i;
+        Hashtbl.set heap.index_map ~key:(X.key d.(fi)) ~data:i;
         moveup fi)
       else (d.(i) <- x;
-      Hashtbl.set h.index_map ~key:(X.key x) ~data:i;
+      Hashtbl.set heap.index_map ~key:(X.key x) ~data:i;
       )
     in
     moveup n;
-    h.size <- n + 1
+    heap.size <- n + 1
   ;;
 
   let find_index heap ~key =
@@ -152,14 +151,14 @@ let index_map h = h.index_map
   ;;
 
 
-  let minimum h =
-    if h.size <= 0 then raise Empty;
-    h.data.(0)
+  let minimum heap =
+    if heap.size <= 0 then raise Empty;
+    heap.data.(0)
   ;;
 
-  let rec movedown h n i x =
-    let d  = h.data in
-    let j = (2 * i) + 1 in
+  let rec movedown heap n current_index x =
+    let d  = heap.data in
+    let j = (2 * current_index) + 1 in
     if j < n
     then (
       let j =
@@ -168,13 +167,13 @@ let index_map h = h.index_map
       in
       if X.compare d.(j) x < 0
       then (
-        d.(i) <- d.(j);
-        Hashtbl.set h.index_map ~key: (X.key (d.(j))) ~data:i ; 
-        movedown h n j x)
-      else (d.(i) <- x; 
-      Hashtbl.set h.index_map ~key: (X.key x) ~data:i ;) )
-    else (d.(i) <- x ; 
-    Hashtbl.set h.index_map ~key: (X.key x) ~data:i ;)
+        d.(current_index) <- d.(j);
+        Hashtbl.set heap.index_map ~key: (X.key (d.(j))) ~data:current_index ; 
+        movedown heap n j x)
+      else (d.(current_index) <- x; 
+      Hashtbl.set heap.index_map ~key: (X.key x) ~data:current_index ;) )
+    else (d.(current_index) <- x ; 
+    Hashtbl.set heap.index_map ~key: (X.key x) ~data:current_index ;)
   ;;
 
   let rec heapify_after_update_at_index updated_book heap index_to_move =
@@ -191,25 +190,25 @@ let index_map h = h.index_map
       heapify_after_update_at_index updated_book heap parent_index)
   ;;
 
-  let remove h =
-    if h.size <= 0 then raise Empty;
-    let n = h.size - 1 in
-    h.size <- n;
-    let d = h.data in
+  let remove heap =
+    if heap.size <= 0 then raise Empty;
+    let n = heap.size - 1 in
+    heap.size <- n;
+    let d = heap.data in
     let x = d.(n) in
-    d.(n) <- h.dummy;
-    movedown h n 0 x;
-    if 4 * h.size < Array.length h.data then shrink h
+    d.(n) <- heap.dummy;
+    movedown heap n 0 x;
+    if 4 * heap.size < Array.length heap.data then shrink heap
   ;;
 
-  let remove_and_add h x =
-    if h.size = 0 then add h x else movedown h h.size 0 x
+  let remove_and_add heap new_element =
+    if heap.size = 0 then add heap new_element else movedown heap heap.size 0 new_element
   ;;
 
-  let pop_minimum h =
-    let m = minimum h in
-    remove h;
-    m
+  let pop_minimum heap =
+    let min = minimum heap in
+    remove heap;
+    min
   ;;
 
   let iter f h =

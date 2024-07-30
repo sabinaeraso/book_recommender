@@ -122,28 +122,26 @@ let get_user_response (state : Book_recommender.State.t) =
   | Some message -> return message
 ;;
 
+let handle_not_done message n ~state =
+  match message with
+  | Message.Interested -> Handle.handle_yes n ~state
+  | Not_Interested -> Handle.handle_no ~state
+  | Read_liked -> Handle.handle_read_yes n ~state
+  | Read_didnt_like -> Handle.handle_no ~state
+  | _ -> failwith "shouldnt have called this handle with that message "
+;;
+
 let rec run_recommender (n : float) (state : Book_recommender.State.t) =
   let%bind response = get_user_response state in
   match response with
-  | Message.Interested ->
-    Handle.handle_yes n ~state;
-    run_recommender (n +. 1.0) state
-  | Not_Interested ->
-    Handle.handle_no ~state;
-    run_recommender (n +. 1.0) state
-  | Read_liked ->
-    Handle.handle_read_yes n ~state;
-    run_recommender (n +. 1.0) state
-  | Read_didnt_like ->
-    Handle.handle_read_no ~state;
-    run_recommender (n +. 1.0) state
   | Done -> return (Handle.handle_done ~state)
+  | _ ->
+    handle_not_done response n ~state;
+    run_recommender (n +. 1.0) state
 ;;
 
 let run () =
-  print_endline "Please input the name of your favorite book! ";
-  (* let origin_book = Page_parser.Book_page.parse_book
-     (Book_fetch.Fetcher.Books.fetch_key "/works/OL82536W") in *)
+  print_endline "Please input the name of your favorite book: ";
   let%bind origin_book = get_origin_book () in
   let state = Book_recommender.State.empty_state in
   state.current_book <- origin_book;

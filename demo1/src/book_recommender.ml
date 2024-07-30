@@ -22,7 +22,7 @@ module State = struct
     in
     let state =
       { visited_books = []
-      ; to_visit = Book.Binary_heap.create ~dummy 1
+      ; to_visit = Book.Binary_heap.create ~dummy 40
       ; recommendations = []
       ; current_book = dummy
       ; visited_subjects = []
@@ -32,10 +32,12 @@ module State = struct
   ;;
 end
 
-let is_in_publish_range (midpoint : int option) (publish_date : int option)
+let is_in_publish_range
+  (midpoint : int option)
+  (publish_date : int option)
+  (range : int)
   : bool
   =
-  let range = 5 in
   match midpoint, publish_date with
   | Some mid, Some date -> mid - range <= date && mid + range >= date
   | _, _ -> false
@@ -46,24 +48,21 @@ let make_heuristic_change
   (instance : Book.t)
   (distance_from_origin : float)
   =
-  if is_in_publish_range origin_book.publish_date instance.publish_date
+  if is_in_publish_range origin_book.publish_date instance.publish_date 5
   then
     instance.heuristic <- instance.heuristic -. (1.5 /. distance_from_origin)
   else
     instance.heuristic <- instance.heuristic -. (1.0 /. distance_from_origin)
 ;;
 
-(* user said yes to X book, so now we call this on all tis subjects : *)
 let update_to_visit_from_subject
   distance_from_origin
   ~(state : State.t)
   ~subject
   =
-  let visited_books = state.visited_books in
-  let visited_subjects = state.visited_subjects in
   let to_visit = state.to_visit in
   if not
-       (List.exists visited_subjects ~f:(fun s ->
+       (List.exists state.visited_subjects ~f:(fun s ->
           String.equal (String.lowercase s) (String.lowercase subject)))
   then (
     print_endline subject;
@@ -75,15 +74,13 @@ let update_to_visit_from_subject
     List.iter books ~f:(fun (book : Book.t) ->
       let key = book.key in
       if not
-           (List.exists visited_books ~f:(fun k ->
-              equal 0 (Book.Key.compare k key)))
+           (List.exists state.visited_books ~f:(fun visited_key ->
+              equal 0 (Book.Key.compare visited_key key)))
       then (
         match Hashtbl.find (Book.Binary_heap.index_map to_visit) key with
         | Some index ->
           let array = Book.Binary_heap.data to_visit in
           let instance = Array.get array index in
-          (* instance.heuristic <- instance.heuristic -. (1.0 /.
-             distance_from_origin); *)
           make_heuristic_change
             state.current_book
             instance
@@ -115,7 +112,7 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
   Book.print next_book
 ;;
 
-let%expect_test "Remove and Leave Updated at Top" =
+let%expect_test "Remove and Updated Heap" =
   let dummy =
     Book.create
       ~title:""
