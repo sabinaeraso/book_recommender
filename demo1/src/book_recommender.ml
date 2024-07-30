@@ -32,6 +32,27 @@ module State = struct
   ;;
 end
 
+let is_in_publish_range (midpoint : int option) (publish_date : int option)
+  : bool
+  =
+  let range = 5 in
+  match midpoint, publish_date with
+  | Some mid, Some date -> mid - range <= date && mid + range >= date
+  | _, _ -> false
+;;
+
+let make_heuristic_change
+  (origin_book : Book.t)
+  (instance : Book.t)
+  (distance_from_origin : float)
+  =
+  if is_in_publish_range origin_book.publish_date instance.publish_date
+  then
+    instance.heuristic <- instance.heuristic -. (1.5 /. distance_from_origin)
+  else
+    instance.heuristic <- instance.heuristic -. (1.0 /. distance_from_origin)
+;;
+
 (* user said yes to X book, so now we call this on all tis subjects : *)
 let update_to_visit_from_subject
   distance_from_origin
@@ -61,8 +82,12 @@ let update_to_visit_from_subject
         | Some index ->
           let array = Book.Binary_heap.data to_visit in
           let instance = Array.get array index in
-          instance.heuristic
-          <- instance.heuristic -. (1.0 /. distance_from_origin);
+          (* instance.heuristic <- instance.heuristic -. (1.0 /.
+             distance_from_origin); *)
+          make_heuristic_change
+            state.current_book
+            instance
+            distance_from_origin;
           Book.Binary_heap.heapify_after_update_at_index
             instance
             to_visit
