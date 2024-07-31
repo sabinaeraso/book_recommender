@@ -110,9 +110,9 @@ let get_user_response (state : Book_recommender.State.t) =
 
 let handle_not_done message n ~state =
   match message with
-  | Message.Interested -> Handle.handle_yes n ~state
+  | Message.Interested -> Handle.handle_yes_google_api n ~state
   | Not_Interested -> Handle.handle_no ~state
-  | Read_liked -> Handle.handle_read_yes n ~state
+  | Read_liked -> Handle.handle_read_yes_google_api n ~state
   | Read_didnt_like -> Handle.handle_no ~state
   | _ -> failwith "shouldnt have called this handle with that message "
 ;;
@@ -131,7 +131,7 @@ let run () =
   let%bind origin_book = get_origin_book () in
   let state = Book_recommender.State.empty_state () in
   Book_recommender.update_current_book ~state ~new_book:origin_book;
-  Handle.handle_read_yes 1.0 ~state;
+  Handle.handle_read_yes_google_api 1.0 ~state;
   run_recommender 2.0 state
 ;;
 
