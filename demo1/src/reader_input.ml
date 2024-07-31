@@ -2,20 +2,6 @@ open Async
 open! Core
 open Fzf
 
-let every (seconds : float) ~f ~stop =
-  let open Async in
-  let rec loop () =
-    if stop
-    then return ()
-    else
-      Clock.after (Time_float.Span.of_sec seconds)
-      >>= fun () ->
-      f ();
-      loop ()
-  in
-  don't_wait_for (loop ())
-;;
-
 let response_options =
   Fzf.Pick_from.assoc
     (List.zip_exn
@@ -143,8 +129,8 @@ let rec run_recommender (n : float) (state : Book_recommender.State.t) =
 let run () =
   print_endline "Please input the name of your favorite book: ";
   let%bind origin_book = get_origin_book () in
-  let state = Book_recommender.State.empty_state in
-  state.current_book <- origin_book;
+  let state = Book_recommender.State.empty_state () in
+  Book_recommender.update_current_book ~state ~new_book:origin_book;
   Handle.handle_read_yes 1.0 ~state;
   run_recommender 2.0 state
 ;;

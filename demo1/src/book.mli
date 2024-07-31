@@ -38,9 +38,9 @@ type t =
   ; mutable description : string
   ; publish_date : Publish_Date.t option
   }
-[@@deriving sexp, compare]
+[@@deriving sexp, compare, fields ~getters]
 
-(* creates a new book and initilizes the heuristic to 0*)
+(* creates a new book and initilizes the heuristic to 10*)
 val create
   :  title:string
   -> author:string option
@@ -50,14 +50,7 @@ val create
   -> publish_date:int option
   -> t
 
-(* prints the title and Open Library key of a book*)
+(* prints the title *)
 val print : t -> unit
-val author : t -> Author.t option
-val description : t -> Description.t
-val isbn : t -> Isbn.t option
-val subjects : t -> Subject.t list
-val key : t -> Key.t
-val title : t -> Title.t
-val heuristic : t -> float
 
 module Binary_heap : Binary_heap.S with type Value.t = t

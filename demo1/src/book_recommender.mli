@@ -1,17 +1,22 @@
 open! Core
 
 module State : sig
-  type t =
+  type t = private
     { mutable visited_books : Book.Key.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
     ; mutable visited_subjects : string list
     }
-  [@@deriving sexp_of]
+  [@@deriving sexp_of, fields ~getters]
+  (* dont expose the type t and only mutate from this file *)
 
-  val empty_state : t
+  val empty_state : unit -> t
 end
+
+val update_current_book : state:State.t -> new_book:Book.t -> unit
+val update_visited : state:State.t -> book:Book.t -> unit
+val update_recommendations : state:State.t -> book:Book.t -> unit
 
 (*takes in the current state and a new subject. adds all the books from this
   subject to the state's to_visit, along with an updated heuristic value.

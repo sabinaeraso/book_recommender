@@ -31,13 +31,11 @@ module type S = sig
   (** [is_empty h] checks the emptiness of [h] *)
   val is_empty : t -> bool
 
-  val index_map : t -> int Core.String.Table.t
-
 
   (** [add x h] adds a new element [x] in heap [h]; complexity O(log(n)). *)
   val add : t -> Value.t -> unit
 
-  val find_index : t -> key:string -> int
+  val find_index : t -> key:string -> int option
   val heapify_after_update_at_index : Value.t -> t -> int -> unit
   (** [minimum h] returns the minimum element of [h]; raises [Empty]
       when [h] is empty; complexity O(1) *)
@@ -96,8 +94,6 @@ module Make (X : Ordered) = struct
   let length h = h.size
   let is_empty h = h.size = 0
 
-let index_map h = h.index_map
-
 
 
   (* [enlarge] doubles the size of [data] *)
@@ -146,8 +142,8 @@ let index_map h = h.index_map
   let find_index heap ~key =
     let index_map = heap.index_map in
     match Hashtbl.find index_map key with
-    | None -> failwith "this book is not  in the index map"
-    | Some index -> index
+    | None -> None
+    | Some index -> Some index
   ;;
 
 

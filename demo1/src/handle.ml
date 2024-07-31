@@ -2,9 +2,10 @@ open! Core
 
 let handle_yes distance_from_origin ~(state : Book_recommender.State.t) =
   let book = state.current_book in
-  state.visited_books <- List.append state.visited_books [ book.key ];
-  state.recommendations <- List.append state.recommendations [ book ];
+  Book_recommender.update_visited ~state ~book;
+  Book_recommender.update_recommendations ~state ~book;
   let subjects = book.subjects in
+  (* this needs to change *)
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
       Or_error.try_with (fun () ->
@@ -15,13 +16,14 @@ let handle_yes distance_from_origin ~(state : Book_recommender.State.t) =
     in
     match valid_subject with Ok _ -> () | Error _ -> ());
   let next_book = Book_recommender.get_next_book ~state in
-  state.current_book <- next_book
+  Book_recommender.update_current_book ~state ~new_book:next_book
 ;;
 
 let handle_read_yes distance_from_origin ~(state : Book_recommender.State.t) =
   let book = state.current_book in
-  state.visited_books <- List.append state.visited_books [ book.key ];
+  Book_recommender.update_visited ~state ~book;
   let subjects = book.subjects in
+  (* this needs to change *)
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
       Or_error.try_with (fun () ->
@@ -32,7 +34,7 @@ let handle_read_yes distance_from_origin ~(state : Book_recommender.State.t) =
     in
     match valid_subject with Ok _ -> () | Error _ -> ());
   let next_book = Book_recommender.get_next_book ~state in
-  state.current_book <- next_book
+  Book_recommender.update_current_book ~state ~new_book:next_book
 ;;
 
 (* sends the "distance from the origin" as 0.5 closer to the origin than in
@@ -43,9 +45,9 @@ let handle_read_yes distance_from_origin ~(state : Book_recommender.State.t) =
 
 let handle_no ~(state : Book_recommender.State.t) =
   let book = state.current_book in
-  state.visited_books <- List.append state.visited_books [ book.key ];
+  Book_recommender.update_visited ~state ~book;
   let next_book = Book_recommender.get_next_book ~state in
-  state.current_book <- next_book
+  Book_recommender.update_current_book ~state ~new_book:next_book
 ;;
 
 let handle_done ~(state : Book_recommender.State.t) =

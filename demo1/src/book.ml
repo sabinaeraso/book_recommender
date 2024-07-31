@@ -17,7 +17,7 @@ type t =
   ; mutable description : Description.t
   ; publish_date : Publish_Date.t option
   }
-[@@deriving sexp, compare]
+[@@deriving sexp, compare, fields ~getters]
 
 let print book = Core.printf !{|Title: %{sexp:Title.t}
 |} book.title
@@ -37,14 +37,6 @@ let create ~title ~author ~key ~subjects ~isbn ~publish_date =
 let compare_by_heuristic =
   Comparable.lift Float.compare ~f:(fun book -> book.heuristic)
 ;;
-
-let subjects t = t.subjects
-let key t = t.key
-let isbn t = t.isbn
-let title t = t.title
-let heuristic t = t.heuristic
-let author t = t.author
-let description t = t.description
 
 module T = struct
   type nonrec t = t [@@deriving sexp]
