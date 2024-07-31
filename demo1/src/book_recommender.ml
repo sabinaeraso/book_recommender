@@ -10,7 +10,7 @@ module State = struct
     }
   [@@deriving sexp_of, fields ~getters]
 
-  let empty_state () =
+  let empty_state book =
     let dummy =
       Book.create
         ~title:"Dummy"
@@ -24,7 +24,7 @@ module State = struct
       { visited_books = []
       ; to_visit = Book.Binary_heap.create ~dummy 40
       ; recommendations = []
-      ; current_book = dummy
+      ; current_book = book
       ; visited_subjects = []
       }
     in

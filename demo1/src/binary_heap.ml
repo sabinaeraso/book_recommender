@@ -7,6 +7,7 @@ module type Ordered = sig
   val key : t -> string
 end
 
+
 exception Empty
 
 module type S = sig
