@@ -16,7 +16,11 @@ module Fetcher = struct
   ;;
 
   let create_subject_search_url ?(maxResults = 40) (name : string) =
-    prefix ^ "?q=subject:" ^ name ^ "&maxResults=" ^ string_of_int maxResults
+    prefix
+    ^ "?q=subject:"
+    ^ format_name name
+    ^ "&maxResults="
+    ^ string_of_int maxResults
   ;;
 
   let fetch_book_by_id id =
