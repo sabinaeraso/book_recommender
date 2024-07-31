@@ -12,6 +12,7 @@ module Parser : sig
   val get_description_from_search_json : string -> string
   val get_authors_from_search_json : string -> string
   val get_self_link_from_search : string -> string
+  val get_categories_from_book : string -> string
   val get_image_from_book : string -> string -> string
 end
 
