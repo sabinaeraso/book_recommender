@@ -10,6 +10,8 @@ module Fetcher : sig
     val fetch_olid : string -> string
   end
 
+  (* make types for your inputs and outputs instead of just strings, to
+     conceal from user *)
   module Search_by_name : sig
     val fetch_from_search : string -> string
   end

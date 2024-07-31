@@ -85,8 +85,8 @@ module Parser = struct
     | _ -> failwith "not proper google api page"
   ;;
 
-  let get_all_books_from_subject raw_page : Yojson.Safe.t list =
-    let page_json = parse_from_string raw_page in
+  let get_all_books_from_subject books_list : Yojson.Safe.t list =
+    let page_json = parse_from_string books_list in
     match page_json with
     | `Assoc page ->
       let items = Page_parser.find_field "items" page in
@@ -96,8 +96,8 @@ module Parser = struct
     | _ -> failwith "not proper google api page"
   ;;
 
-  let get_authors_from_vol_info raw_page =
-    match Page_parser.find_field_option "authors" raw_page with
+  let get_authors_from_vol_info fields_map =
+    match Page_parser.find_field_option "authors" fields_map with
     | None -> None
     | Some authors ->
       (match authors with
@@ -109,8 +109,8 @@ module Parser = struct
        | _ -> failwith "authors not properly formatted")
   ;;
 
-  let get_isbn_from_vol_info raw_page =
-    match Page_parser.find_field "industryIdentifiers" raw_page with
+  let get_isbn_from_vol_info fields_map =
+    match Page_parser.find_field "industryIdentifiers" fields_map with
     | `List isbn_list ->
       (match List.hd_exn isbn_list with
        | `Assoc isbn_map ->
@@ -120,6 +120,16 @@ module Parser = struct
           | _ -> None)
        | _ -> None)
     | _ -> failwith "isbn not properly formatted"
+  ;;
+
+  let get_categories_from_vol_info fields_map =
+    match Page_parser.find_field "categories" fields_map with
+    | `List categories_list ->
+      String.concat
+        ~sep:", "
+        (List.map categories_list ~f:(fun category ->
+           to_string_and_format category))
+    | _ -> failwith "categories not properly formatted"
   ;;
 
   let make_book_from_book_json (raw_book : Yojson.Safe.t) =
@@ -178,6 +188,16 @@ module Parser = struct
 
   let get_self_link_from_search raw_page =
     get_entry_type_from_search raw_page "selfLink"
+  ;;
+
+  let get_categories_from_book raw_page =
+    let page_json = parse_from_string raw_page in
+    match page_json with
+    | `Assoc page ->
+      (match Page_parser.find_field "volumeInfo" page with
+       | `Assoc volinfo -> get_categories_from_vol_info volinfo
+       | _ -> "volume info not properly formatted")
+    | _ -> failwith "page not properly formatted"
   ;;
 
   let get_image_from_book raw_page (image_size : string) =
@@ -271,6 +291,24 @@ let find_book_by_subject =
         print_s [%sexp (fetched_file : Book.t list)]]
 ;;
 
+let find_books_categories =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:
+      "Given a book name, tries to find all categories using Google API"
+    [%map_open
+      let name = flag "name" (required string) ~doc:"The book name" in
+      fun () ->
+        let book_link =
+          Parser.get_self_link_from_search (Fetcher.search_book_by_name name)
+        in
+        let fetched_file =
+          Parser.get_categories_from_book
+            (Fetcher.fetch_by_self_link book_link)
+        in
+        print_s [%sexp (fetched_file : string)]]
+;;
+
 let command =
   Command.group
     ~summary:"Allows for using the Google Api to get info"
@@ -279,5 +317,6 @@ let command =
     ; "description-by-name", find_book_description
     ; "authors-by-name", find_book_authors
     ; "books-of-subject", find_book_by_subject
+    ; "categories-of-book", find_books_categories
     ]
 ;;
