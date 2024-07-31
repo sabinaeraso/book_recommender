@@ -125,8 +125,8 @@ module Parser = struct
   let get_categories_from_vol_info fields_map =
     match Page_parser.find_field "categories" fields_map with
     | `List categories_list ->
-      String.concat
-        ~sep:", "
+      List.dedup_and_sort
+        ~compare:String.compare
         (List.map categories_list ~f:(fun category ->
            to_string_and_format category))
     | _ -> failwith "categories not properly formatted"
@@ -196,7 +196,7 @@ module Parser = struct
     | `Assoc page ->
       (match Page_parser.find_field "volumeInfo" page with
        | `Assoc volinfo -> get_categories_from_vol_info volinfo
-       | _ -> "volume info not properly formatted")
+       | _ -> failwith "volume info not properly formatted")
     | _ -> failwith "page not properly formatted"
   ;;
 
@@ -306,7 +306,7 @@ let find_books_categories =
           Parser.get_categories_from_book
             (Fetcher.fetch_by_self_link book_link)
         in
-        print_s [%sexp (fetched_file : string)]]
+        print_s [%sexp (fetched_file : string list)]]
 ;;
 
 let command =
