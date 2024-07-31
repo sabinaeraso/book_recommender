@@ -28,12 +28,11 @@ module type S = sig
 
   (** [is_empty h] checks the emptiness of [h] *)
   val is_empty : t -> bool
-  val index_map : t -> int Core.String.Table.t
 
   (** [add x h] adds a new element [x] in heap [h]; complexity O(log(n)). *)
   val add : t -> Value.t -> unit
 
-  val find_index : t -> key:string -> int
+  val find_index : t -> key:string -> int option
   val heapify_after_update_at_index : Value.t -> t -> int -> unit
   (** [minimum h] returns the minimum element of [h]; raises [Empty]
       when [h] is empty; complexity O(1) *)
