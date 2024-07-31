@@ -127,8 +127,9 @@ module Parser = struct
     | `List categories_list ->
       List.dedup_and_sort
         ~compare:String.compare
-        (List.map categories_list ~f:(fun category ->
-           to_string_and_format category))
+        (List.concat_map categories_list ~f:(fun category ->
+           let category_as_string = to_string_and_format category in
+           String.split category_as_string ~on:'/'))
     | _ -> failwith "categories not properly formatted"
   ;;
 
@@ -165,6 +166,10 @@ module Parser = struct
   let get_books_from_subject_search (raw_string : string) =
     let items = get_all_books_from_subject raw_string in
     make_books_list items
+  ;;
+
+  let make_book_from_search (raw_string : string) =
+    List.hd_exn (get_books_from_subject_search raw_string)
   ;;
 
   let get_book_id_from_search_json raw_page =

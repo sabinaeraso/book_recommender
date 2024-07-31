@@ -81,8 +81,7 @@ let update_to_visit_from_subject
     state.visited_subjects <- List.append state.visited_subjects [ subject ];
     let books_raw = Google_api.Fetcher.search_by_subject subject in
     let books = Google_api.Parser.get_books_from_subject_search books_raw in
-    (* these need to change with new functions that get all the books from
-       one subject *)
+    (*List.iter books ~f:(fun book -> Book.print book); *)
     List.iter books ~f:(fun (book : Book.t) ->
       let key = book.key in
       if not

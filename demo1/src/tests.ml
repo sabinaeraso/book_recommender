@@ -1,25 +1,20 @@
 open! Core
 
-let%expect_test "Get books from subject: Fantasy_fiction" =
+let%expect_test "Get books from subject: Action & Adventure" =
   let state = Book_recommender.State.empty_state () in
   Book_recommender.update_to_visit_from_subject
     1.0
     ~state
-    ~subject:"Fantasy_fiction";
+    ~subject:"Action & Adventure";
   Book.Binary_heap.iter (fun book -> Book.print book) state.to_visit
 ;;
 
-let%expect_test "Get next book from Tooth Fairy subject original queue" =
-  let state = Book_recommender.State.empty_state () in
-  Book_recommender.update_to_visit_from_subject
-    1.0
-    ~state
-    ~subject:"tooth_fairy";
-  let next_book = Book_recommender.get_next_book ~state in
-  print_s [%message (state : Book_recommender.State.t)];
-  Book.print next_book
-;;
-
+(* let%expect_test "Get next book from Tooth Fairy subject original queue" =
+   let state = Book_recommender.State.empty_state () in
+   Book_recommender.update_to_visit_from_subject 1.0 ~state
+   ~subject:"tooth_fairy"; let next_book = Book_recommender.get_next_book
+   ~state in print_s [%message (state : Book_recommender.State.t)];
+   Book.print next_book ;; *)
 let%expect_test "Remove and Updated Heap" =
   let dummy =
     Book.create

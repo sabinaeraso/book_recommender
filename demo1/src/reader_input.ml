@@ -25,12 +25,10 @@ let get_origin_book_input () =
 
 let rec get_origin_book () =
   let%bind name_to_search = get_origin_book_input () in
-  let raw_page =
-    Book_fetch.Fetcher.Search_by_name.fetch_from_search name_to_search
-  in
+  let raw_page = Google_api.Fetcher.search_book_by_name name_to_search in
   let valid =
     Or_error.try_with (fun () ->
-      Page_parser.Search_page.parse_searches raw_page)
+      Google_api.Parser.make_book_from_search raw_page)
   in
   match valid with
   | Ok book -> return book
