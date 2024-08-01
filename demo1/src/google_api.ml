@@ -163,13 +163,9 @@ module Parser = struct
     | _ -> failwith "book field not properly formatted"
   ;;
 
-  let make_books_list (raw_book_info : Yojson.Safe.t list) =
-    List.map raw_book_info ~f:(fun book -> make_book_from_book_json book)
-  ;;
-
   let get_books_from_subject_search (raw_string : string) =
     let items = get_all_books_from_subject raw_string in
-    make_books_list items
+    List.map items ~f:(fun book -> make_book_from_book_json book)
   ;;
 
   let make_book_from_search (raw_string : string) =
@@ -209,7 +205,7 @@ module Parser = struct
     | _ -> failwith "page not properly formatted"
   ;;
 
-  let get_image_from_book raw_page (image_size : string) =
+  let get_image_from_book raw_page ~(image_size : string) =
     let page_json = parse_from_string raw_page in
     match page_json with
     | `Assoc page ->
@@ -224,6 +220,47 @@ module Parser = struct
           | _ -> failwith "items entries not formatted well")
        | _ -> failwith "items entries not formatted well")
     | _ -> failwith "not proper google api page"
+  ;;
+end
+
+module Fetch_and_parse = struct
+  let get_book_from_title title =
+    Parser.make_book_from_search (Fetcher.search_book_by_name title)
+  ;;
+
+  let get_books_from_subject subject =
+    Parser.get_books_from_subject_search (Fetcher.search_by_subject subject)
+  ;;
+
+  let get_book_description_from_title title =
+    Parser.get_description_from_search_json
+      (Fetcher.search_book_by_name title)
+  ;;
+
+  let get_categories_from_title title =
+    Fetcher.search_book_by_name title
+    |> Parser.get_self_link_from_search
+    |> Fetcher.fetch_by_self_link
+    |> Parser.get_categories_from_book
+  ;;
+
+  let get_categories_from_id id =
+    Fetcher.fetch_book_by_id id |> Parser.get_categories_from_book
+  ;;
+
+  let get_cover_from_title ~title ~image_size =
+    Fetcher.search_book_by_name title
+    |> Parser.get_self_link_from_search
+    |> Fetcher.fetch_by_self_link
+    |> Parser.get_image_from_book ~image_size
+  ;;
+
+  let get_cover_from_id ~id ~image_size =
+    Fetcher.fetch_book_by_id id |> Parser.get_image_from_book ~image_size
+  ;;
+
+  let get_authors_from_title title =
+    Fetcher.search_book_by_name title |> Parser.get_authors_from_search_json
   ;;
 end
 
@@ -253,7 +290,9 @@ let find_image_link =
                (Fetcher.search_book_by_name name))
         in
         print_s
-          [%sexp (Parser.get_image_from_book fetched_file "small" : string)]]
+          [%sexp
+            (Parser.get_image_from_book fetched_file ~image_size:"small"
+             : string)]]
 ;;
 
 let find_book_description =
