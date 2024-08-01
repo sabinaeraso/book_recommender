@@ -32,7 +32,7 @@ let subject_is_valid ~subject =
     ; "new york times"
     ; "electronic book"
     ; "ebook"
-    ; "classics"
+    ; "classic"
     ; "er tong wen xue"
     ; "other"
     ; "pdf"
@@ -43,6 +43,8 @@ let subject_is_valid ~subject =
     ; "romans, nouvelles"
     ; "813/.54"
     ; "813.54"
+    ; "hardcover"
+    ; "autographed"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->
