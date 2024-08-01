@@ -25,7 +25,7 @@ let handle_yes_google_api
   let book = state.current_book in
   Book_recommender.update_visited ~state ~book;
   Book_recommender.update_recommendations ~state ~book;
-  let book_page_raw = Google_api.Fetcher.fetch_book_by_id book.key in
+  let book_page_raw = Google_api.Fetcher.fetch_book_by_id book.google_id in
   let subjects = Google_api.Parser.get_categories_from_book book_page_raw in
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
@@ -46,7 +46,7 @@ let handle_read_yes_google_api
   =
   let book = state.current_book in
   Book_recommender.update_visited ~state ~book;
-  let book_page_raw = Google_api.Fetcher.fetch_book_by_id book.key in
+  let book_page_raw = Google_api.Fetcher.fetch_book_by_id book.google_id in
   let subjects = Google_api.Parser.get_categories_from_book book_page_raw in
   List.iter subjects ~f:(fun subject ->
     let valid_subject =

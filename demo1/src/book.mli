@@ -8,7 +8,11 @@ module Title : sig
   type t = string [@@deriving sexp, compare, hash]
 end
 
-module Key : sig
+module OL_Id : sig
+  type t = string [@@deriving sexp, compare, hash]
+end
+
+module Google_Id : sig
   type t = string [@@deriving sexp, compare, hash]
 end
 
@@ -31,7 +35,8 @@ end
 type t =
   { title : Title.t
   ; author : Author.t option
-  ; key : Key.t
+  ; ol_id : OL_Id.t
+  ; google_id : Google_Id.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
   ; mutable heuristic : float
@@ -44,9 +49,10 @@ type t =
 val create
   :  title:string
   -> author:string option
-  -> key:string
-  -> subjects:string list
+  -> ol_id:string
+  -> google_id:string
   -> isbn:int option
+  -> subjects:string list
   -> publish_date:int option
   -> t
 

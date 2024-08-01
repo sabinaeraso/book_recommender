@@ -1,8 +1,8 @@
 open! Core
 
 module State : sig
-  type t = private
-    { mutable visited_books : Book.Key.t list
+  type t =
+    { mutable visited_books : Book.OL_Id.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t

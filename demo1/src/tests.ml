@@ -5,7 +5,8 @@ let%expect_test "Get books from subject: Action & Adventure" =
     Book.create
       ~title:""
       ~author:None
-      ~key:""
+      ~ol_id:""
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -23,7 +24,8 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
     Book.create
       ~title:""
       ~author:None
-      ~key:""
+      ~ol_id:""
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -38,12 +40,13 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
   Book.print next_book
 ;;
 
-let%expect_test "Remove and Updated Heap" =
+let%expect_test "Remove and Update Heap" =
   let dummy =
     Book.create
       ~title:""
       ~author:None
-      ~key:""
+      ~ol_id:""
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -52,7 +55,8 @@ let%expect_test "Remove and Updated Heap" =
     Book.create
       ~title:"1"
       ~author:None
-      ~key:"1"
+      ~ol_id:"1"
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -62,7 +66,8 @@ let%expect_test "Remove and Updated Heap" =
     Book.create
       ~title:"2"
       ~author:None
-      ~key:"2"
+      ~ol_id:"2"
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -72,7 +77,8 @@ let%expect_test "Remove and Updated Heap" =
     Book.create
       ~title:"3"
       ~author:None
-      ~key:"3"
+      ~ol_id:"3"
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -82,7 +88,8 @@ let%expect_test "Remove and Updated Heap" =
     Book.create
       ~title:"4"
       ~author:None
-      ~key:"4"
+      ~ol_id:"4"
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -92,7 +99,8 @@ let%expect_test "Remove and Updated Heap" =
     Book.create
       ~title:"5"
       ~author:None
-      ~key:"5"
+      ~ol_id:"5"
+      ~google_id:""
       ~subjects:[]
       ~isbn:None
       ~publish_date:None
@@ -104,7 +112,7 @@ let%expect_test "Remove and Updated Heap" =
   Book.Binary_heap.add heap book_three;
   Book.Binary_heap.add heap book_four;
   Book.Binary_heap.add heap book_five;
-  match Book.Binary_heap.find_index heap ~key:book_four.key with
+  match Book.Binary_heap.find_index heap ~key:book_four.ol_id with
   | None -> failwith "not found"
   | Some index ->
     book_four.heuristic <- 1.0;
