@@ -61,7 +61,7 @@ let make_heuristic_change
   (instance : Book.t)
   (distance_from_origin : float)
   =
-  if is_in_publish_range origin_book.publish_date instance.publish_date 5
+  if is_in_publish_range origin_book.publish_date instance.publish_date 10
   then
     instance.heuristic
     <- instance.heuristic -. (1.5 -. (distance_from_origin /. 10.0))
