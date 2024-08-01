@@ -25,14 +25,14 @@ let get_origin_book_input () =
 
 let rec get_origin_book () =
   let%bind name_to_search = get_origin_book_input () in
-  let raw_page = Google_api.Fetcher.search_book_by_name name_to_search in
   let valid =
     Or_error.try_with (fun () ->
-      Google_api.Parser.make_book_from_search raw_page)
+      Open_library.Fetch_and_parse.get_book_from_title name_to_search)
   in
   match valid with
   | Ok book -> return book
-  | Error _ ->
+  | Error err ->
+    print_endline (Error.to_string_hum err);
     print_endline
       "Could not find book of that title please try different title! \n";
     get_origin_book ()
@@ -108,9 +108,9 @@ let get_user_response (state : Book_recommender.State.t) =
 
 let handle_not_done message n ~state =
   match message with
-  | Message.Interested -> Handle.handle_yes_google_api n ~state
+  | Message.Interested -> Handle.handle_yes n ~state
   | Not_Interested -> Handle.handle_no ~state
-  | Read_liked -> Handle.handle_read_yes_google_api n ~state
+  | Read_liked -> Handle.handle_read_yes n ~state
   | Read_didnt_like -> Handle.handle_no ~state
   | _ -> failwith "shouldnt have called this handle with that message "
 ;;
@@ -128,7 +128,7 @@ let run () =
   print_endline "Please input the name of your favorite book: ";
   let%bind origin_book = get_origin_book () in
   let state = Book_recommender.State.empty_state origin_book in
-  Handle.handle_read_yes_google_api 1.0 ~state;
+  Handle.handle_read_yes 1.0 ~state;
   run_recommender 2.0 state
 ;;
 

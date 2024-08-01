@@ -80,11 +80,12 @@ let update_to_visit_from_subject
   then (
     print_endline subject;
     state.visited_subjects <- List.append state.visited_subjects [ subject ];
-    let books_raw = Google_api.Fetcher.search_by_subject subject in
-    let books = Google_api.Parser.get_books_from_subject_search books_raw in
+    let books =
+      Open_library.Fetch_and_parse.get_books_from_subject subject
+    in
     (*List.iter books ~f:(fun book -> Book.print book); *)
     List.iter books ~f:(fun (book : Book.t) ->
-      let key = book.google_id in
+      let key = book.ol_id in
       if not
            (List.exists state.visited_books ~f:(fun visited_key ->
               equal 0 (Book.OL_Id.compare visited_key key)))
