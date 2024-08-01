@@ -128,9 +128,8 @@ let make_book_from_json (book_info : Yojson.Safe.t) : Book.t =
           | _ -> Some isbn)
         else None)
     in
-    let subjects =
-      make_subject_list_from_json (find_field "subject" fields)
-    in
+    (* let subjects = make_subject_list_from_json (find_field "subject"
+       fields) in *)
     Book.create
       ~title:(format_field (Yojson.Safe.to_string title))
       ~author
@@ -141,7 +140,7 @@ let make_book_from_json (book_info : Yojson.Safe.t) : Book.t =
          | None -> None
          | Some num ->
            Some (Int.of_string (format_field (Yojson.Safe.to_string num))))
-      ~subjects
+      ~subjects:[]
       ~publish_date
   | _ -> failwith "Was not properly formatted"
 ;;
@@ -212,6 +211,13 @@ module Book_page = struct
 
   let parse_book (raw_page : string) =
     make_book_from_book_json (parse_from_string raw_page)
+  ;;
+
+  let parse_subjects_from_book (raw_page : string) =
+    match parse_from_string raw_page with
+    | `Assoc fields ->
+      make_subject_list_from_json (find_field "subjects" fields)
+    | _ -> failwith ""
   ;;
 
   let get_book_description (raw_page : string) =

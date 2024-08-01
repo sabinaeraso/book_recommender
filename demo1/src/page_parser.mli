@@ -15,6 +15,7 @@ end
 
 module Book_page : sig
   val parse_book : string -> Book.t
+  val parse_subjects_from_book : string -> string list
   val get_book_description : string -> string
 end
 

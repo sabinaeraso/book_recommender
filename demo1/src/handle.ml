@@ -4,7 +4,10 @@ let handle_yes distance_from_origin ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   Book_recommender.update_visited ~state ~book;
   Book_recommender.update_recommendations ~state ~book;
-  let subjects = book.subjects in
+  let subjects =
+    Open_library.Fetch_and_parse.get_subjects_from_key book.ol_id
+    (* book.subjects *)
+  in
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
       Or_error.try_with (fun () ->
@@ -64,7 +67,10 @@ let handle_read_yes_google_api
 let handle_read_yes distance_from_origin ~(state : Book_recommender.State.t) =
   let book = state.current_book in
   Book_recommender.update_visited ~state ~book;
-  let subjects = book.subjects in
+  let subjects =
+    Open_library.Fetch_and_parse.get_subjects_from_key book.ol_id
+    (* book.subjects *)
+  in
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
       Or_error.try_with (fun () ->
