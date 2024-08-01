@@ -2,7 +2,7 @@ open! Core
 
 module State = struct
   type t =
-    { mutable visited_books : Book.Key.t list
+    { mutable visited_books : Book.OL_Id.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
@@ -10,12 +10,13 @@ module State = struct
     }
   [@@deriving sexp_of, fields ~getters]
 
-  let empty_state () =
+  let empty_state book =
     let dummy =
       Book.create
         ~title:"Dummy"
         ~author:None
-        ~key:"Key"
+        ~ol_id:"Key"
+        ~google_id:"Key"
         ~subjects:[]
         ~isbn:(Some 1)
         ~publish_date:None
@@ -24,7 +25,7 @@ module State = struct
       { visited_books = []
       ; to_visit = Book.Binary_heap.create ~dummy 40
       ; recommendations = []
-      ; current_book = dummy
+      ; current_book = book
       ; visited_subjects = []
       }
     in
@@ -37,7 +38,7 @@ let update_current_book ~(state : State.t) ~new_book =
 ;;
 
 let update_visited ~(state : State.t) ~(book : Book.t) =
-  state.visited_books <- List.append state.visited_books [ book.key ]
+  state.visited_books <- List.append state.visited_books [ book.ol_id ]
 ;;
 
 let update_recommendations ~(state : State.t) ~(book : Book.t) =
@@ -83,10 +84,10 @@ let update_to_visit_from_subject
     let books = Google_api.Parser.get_books_from_subject_search books_raw in
     (*List.iter books ~f:(fun book -> Book.print book); *)
     List.iter books ~f:(fun (book : Book.t) ->
-      let key = book.key in
+      let key = book.ol_id in
       if not
            (List.exists state.visited_books ~f:(fun visited_key ->
-              equal 0 (Book.Key.compare visited_key key)))
+              equal 0 (Book.OL_Id.compare visited_key key)))
       then (
         match Book.Binary_heap.find_index to_visit ~key with
         | Some index ->

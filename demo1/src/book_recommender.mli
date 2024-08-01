@@ -1,8 +1,8 @@
 open! Core
 
 module State : sig
-  type t = private
-    { mutable visited_books : Book.Key.t list
+  type t =
+    { mutable visited_books : Book.OL_Id.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
@@ -11,7 +11,7 @@ module State : sig
   [@@deriving sexp_of, fields ~getters]
   (* dont expose the type t and only mutate from this file *)
 
-  val empty_state : unit -> t
+  val empty_state : Book.t -> t
 end
 
 val update_current_book : state:State.t -> new_book:Book.t -> unit
