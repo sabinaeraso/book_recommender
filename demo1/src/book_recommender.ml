@@ -63,9 +63,11 @@ let make_heuristic_change
   =
   if is_in_publish_range origin_book.publish_date instance.publish_date 5
   then
-    instance.heuristic <- instance.heuristic -. (1.5 /. distance_from_origin)
+    instance.heuristic
+    <- instance.heuristic -. (1.5 -. (distance_from_origin /. 10.0))
   else
-    instance.heuristic <- instance.heuristic -. (1.0 /. distance_from_origin)
+    instance.heuristic
+    <- instance.heuristic -. (1.0 -. (distance_from_origin /. 10.0))
 ;;
 
 let update_to_visit_from_subject
