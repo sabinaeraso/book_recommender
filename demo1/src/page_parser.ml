@@ -134,7 +134,8 @@ let make_book_from_json (book_info : Yojson.Safe.t) : Book.t =
     Book.create
       ~title:(format_field (Yojson.Safe.to_string title))
       ~author
-      ~key:(format_field (Yojson.Safe.to_string key))
+      ~ol_id:(format_field (Yojson.Safe.to_string key))
+      ~google_id:""
       ~isbn:
         (match isbn with
          | None -> None
@@ -197,7 +198,8 @@ module Book_page = struct
       Book.create
         ~title:(format_field (Yojson.Safe.to_string title))
         ~author
-        ~key:(format_field (Yojson.Safe.to_string key))
+        ~ol_id:(format_field (Yojson.Safe.to_string key))
+        ~google_id:""
         ~isbn:
           (match isbn with
            | None -> None

@@ -42,7 +42,7 @@ let get_valid_description (current_book : Book.t) =
   let valid_desc =
     Or_error.try_with (fun () ->
       Page_parser.Book_page.get_book_description
-        (Book_fetch.Fetcher.Books.fetch_key current_book.key))
+        (Book_fetch.Fetcher.Books.fetch_key current_book.ol_id))
   in
   let description =
     match valid_desc with

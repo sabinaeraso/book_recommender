@@ -158,14 +158,24 @@ module Parser = struct
                    4))
          in
          let isbn = get_isbn_from_vol_info info_map in
-         Book.create ~title ~key:id ~isbn ~author ~subjects:[] ~publish_date
+         Book.create
+           ~title
+           ~google_id:id
+           ~ol_id:""
+           ~isbn
+           ~author
+           ~subjects:[]
+           ~publish_date
        | _ -> failwith "Info in volumeinfo not formatted properly")
     | _ -> failwith "book field not properly formatted"
   ;;
 
   let get_books_from_subject_search (raw_string : string) =
     let items = get_all_books_from_subject raw_string in
-    List.map items ~f:(fun book -> make_book_from_book_json book)
+    List.map items ~f:(fun book ->
+      let new_book = make_book_from_book_json book in
+      print_s [%sexp (new_book : Book.t)];
+      new_book)
   ;;
 
   let make_book_from_search (raw_string : string) =
