@@ -36,7 +36,7 @@ type t =
   { title : Title.t
   ; author : Author.t option
   ; ol_id : OL_Id.t
-  ; google_id : Google_Id.t
+  ; mutable google_id : Google_Id.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
   ; mutable heuristic : float

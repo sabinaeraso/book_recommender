@@ -12,7 +12,7 @@ type t =
   { title : Title.t
   ; author : Author.t option
   ; ol_id : OL_Id.t
-  ; google_id : Google_Id.t
+  ; mutable google_id : Google_Id.t
   ; isbn : Isbn.t option
   ; subjects : Subject.t list
   ; mutable heuristic : float
@@ -45,7 +45,7 @@ module T = struct
   type nonrec t = t [@@deriving sexp]
 
   let compare = compare_by_heuristic
-  let key = ol_id
+  let key = google_id
 end
 
 module Binary_heap = Binary_heap.Make (T)

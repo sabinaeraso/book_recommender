@@ -2,7 +2,7 @@ open! Core
 
 module State = struct
   type t =
-    { mutable visited_books : Book.OL_Id.t list
+    { mutable visited_books : Book.Google_Id.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
@@ -38,7 +38,7 @@ let update_current_book ~(state : State.t) ~new_book =
 ;;
 
 let update_visited ~(state : State.t) ~(book : Book.t) =
-  state.visited_books <- List.append state.visited_books [ book.ol_id ]
+  state.visited_books <- List.append state.visited_books [ book.google_id ]
 ;;
 
 let update_recommendations ~(state : State.t) ~(book : Book.t) =
@@ -84,7 +84,7 @@ let update_to_visit_from_subject
     let books = Google_api.Parser.get_books_from_subject_search books_raw in
     (*List.iter books ~f:(fun book -> Book.print book); *)
     List.iter books ~f:(fun (book : Book.t) ->
-      let key = book.ol_id in
+      let key = book.google_id in
       if not
            (List.exists state.visited_books ~f:(fun visited_key ->
               equal 0 (Book.OL_Id.compare visited_key key)))
