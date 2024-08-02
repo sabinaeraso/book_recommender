@@ -263,11 +263,17 @@ module Search_page = struct
           | Some book -> make_book_from_json book)
        | _ -> failwith "Docs not formatted correctly")
     | _ -> failwith "Returned page not formatted correctly"
+
   ;;
 
   let parse_searches (raw_page : string) : Book.t =
     get_most_relevant_book (parse_from_string raw_page)
   ;;
+(*
+  let get_first_language (edition_page : Yojson.Safe.t) =
+
+  ;;
+*)
 end
 
 let fetch_books_by_subject =

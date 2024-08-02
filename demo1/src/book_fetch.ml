@@ -55,6 +55,19 @@ module Fetcher = struct
     let fetch_from_search name =
       File_fetcher.fetch_exn Remote ~resource:(create_search_url name)
     ;;
+
+    let create_edition_search_url (title : string) =
+      prefix
+      ^ "search.json/q="
+      ^ format_name title
+      ^ "&fields=key,title,author_name,editions,editions.key,editions.title,editions.ebook_access,editions.language"
+    ;;
+
+    let fetch_edition_language_page (title : string) =
+      let url = create_edition_search_url title in
+      let result = File_fetcher.fetch_exn Remote ~resource:url in
+      result
+    ;;
   end
 end
 
@@ -107,6 +120,21 @@ let search_book_command =
         print_endline fetched_file]
 ;;
 
+let fetch_language_command =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:
+      "Given a title, Ex. 'Prisoner of Azkaban' will return the language of \
+       the first edition of the book"
+    [%map_open
+      let title = flag "-title" (required string) ~doc:" the subject name" in
+      fun () ->
+        let fetched_file =
+          Fetcher.Search_by_name.fetch_edition_language_page title
+        in
+        print_endline fetched_file]
+;;
+
 let command =
   Command.group
     ~summary:"Fetch from Open Library"
@@ -114,5 +142,6 @@ let command =
     ; "book-fetch-by-key", fetch_key_command
     ; "book-fetch-by-olid", fetch_olid_command
     ; "search-book-name", search_book_command
+    ; "fetch-language", fetch_language_command
     ]
 ;;

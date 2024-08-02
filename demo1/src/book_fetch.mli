@@ -14,6 +14,7 @@ module Fetcher : sig
      conceal from user *)
   module Search_by_name : sig
     val fetch_from_search : string -> string
+    val fetch_edition_language_page : string -> string
   end
 end
 
