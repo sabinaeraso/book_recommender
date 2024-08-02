@@ -46,6 +46,8 @@ let subject_is_valid ~subject =
     ; "hardcover"
     ; "autographed"
     ; "children's stories"
+    ; "tong hua"
+    ; "deutschland"
     ]
   in
   List.fold_until
