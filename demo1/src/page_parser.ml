@@ -48,11 +48,16 @@ let subject_is_valid ~subject =
     ; "children's stories"
     ]
   in
-  List.fold banned_keywords ~init:true ~f:(fun state word ->
-    let lower_subject = String.lowercase subject in
-    if String.is_substring ~substring:word lower_subject
-    then false
-    else state)
+  List.fold_until
+    banned_keywords
+    ~finish:(fun _b -> true)
+    ~init:true
+    ~f:(fun state word ->
+      let lower_subject = String.lowercase subject in
+      if String.is_substring ~substring:word lower_subject
+         || String.equal word lower_subject
+      then Stop false
+      else Continue state)
 ;;
 
 let make_subject_list_from_json (json_list : Yojson.Safe.t) =
