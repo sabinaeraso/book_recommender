@@ -2,7 +2,7 @@ open! Core
 
 module Fetch_and_parse = struct
   let get_books_from_subject (subject : string) =
-    Book_fetch.Fetcher.Subjects.fetch_sub subject ~limit:300
+    Book_fetch.Fetcher.Subjects.fetch_sub subject ~limit:500
     |> Page_parser.Subject_page.parse_books
   ;;
 

@@ -45,6 +45,7 @@ let subject_is_valid ~subject =
     ; "813.54"
     ; "hardcover"
     ; "autographed"
+    ; "children's stories"
     ]
   in
   List.fold banned_keywords ~init:true ~f:(fun state word ->
@@ -229,7 +230,10 @@ module Book_page = struct
       let desc = find_field "description" fields in
       (match desc with
        | `Assoc desc_map ->
-         format_field (Yojson.Safe.to_string (find_field "value" desc_map))
+         format_field
+           (match find_field "value" desc_map with
+            | `String desc_string -> desc_string
+            | _ -> failwith "not string")
        | `String desc_string -> format_field desc_string
        | _ -> failwith "Description in Open Library not properly formatted")
     | _ -> failwith "Was not a properly formatted JSON file"

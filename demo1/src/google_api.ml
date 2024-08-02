@@ -188,8 +188,9 @@ module Parser = struct
 
   let get_description_from_search_json raw_page =
     Page_parser.format_field
-      (Yojson.Safe.to_string
-         (get_entry_from_volumeinfo_json raw_page "description"))
+      (match get_entry_from_volumeinfo_json raw_page "description" with
+       | `String desc -> desc
+       | _ -> failwith "description was not string")
   ;;
 
   let get_authors_from_search_json raw_page =
