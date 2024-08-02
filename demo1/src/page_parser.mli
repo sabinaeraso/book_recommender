@@ -21,6 +21,7 @@ end
 
 module Search_page : sig
   val parse_searches : string -> Book.t
+  val get_first_language_from_json : string -> string
 end
 
 val command : Command.t
