@@ -294,7 +294,7 @@ module Search_page = struct
                 | _ -> failwith "no inner doc")
              | _ -> failwith "no inner docs")
           | _ -> failwith "No entries in first doc")
-       | _ -> failwith "")
+       | _ -> failwith "no outer docs")
     | _ -> failwith "Was not properly formatted"
   ;;
 end
