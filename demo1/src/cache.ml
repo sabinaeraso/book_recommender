@@ -50,17 +50,29 @@ open Async
 
 type t =
   { mutable stored_subjects : String.Set.t (* names of the subjects stored*)
-  ; _size : int (* number of subjects stored*)
+  ; mutable size : int (* number of subjects stored*)
   }
 
 let is_in_cache t subject = Set.mem t.stored_subjects subject
+let check_limit t = t.size <= 1000
 
 let write_to_cache t subject =
-  t.stored_subjects <- Set.add t.stored_subjects subject;
-  let raw_subject_page =
-    Book_fetch.Fetcher.Subjects.fetch_sub ~limit:1000 subject
-  in
-  Writer.save ("cache/" ^ subject ^ ".txt") ~contents:raw_subject_page
+  if check_limit t
+  then (
+    let valid_file =
+      Or_error.try_with (fun () ->
+        let raw_subject_page =
+          Book_fetch.Fetcher.Subjects.fetch_sub ~limit:1000 subject
+        in
+        Writer.save ("cache/" ^ subject ^ ".txt") ~contents:raw_subject_page)
+    in
+    match valid_file with
+    | Ok _ ->
+      t.stored_subjects <- Set.add t.stored_subjects subject;
+      t.size <- t.size + 1;
+      return ()
+    | Error _ -> return ())
+  else return ()
 ;;
 
 (* need to ensure that the subject is already a created empty file before
@@ -86,7 +98,7 @@ let write_file =
       let subject = flag "subject" (required string) ~doc:"Subject" in
       fun () ->
         let sub =
-          { stored_subjects = String.Set.of_list [ "hi" ]; _size = 0 }
+          { stored_subjects = String.Set.of_list [ "hi" ]; size = 0 }
         in
         let%bind.Deferred text = get_from_cache sub subject in
         print_endline text;
