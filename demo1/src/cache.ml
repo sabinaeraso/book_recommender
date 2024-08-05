@@ -1,4 +1,4 @@
-open! Core
+(* open! Core
 open Async
 
 type t =
@@ -29,4 +29,4 @@ if is_in_cache
 else (* file fetch and call to api, *)
  write_to_cache t subject
 
-;;
+;; *)

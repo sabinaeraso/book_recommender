@@ -26,12 +26,10 @@ module Fetch_and_parse = struct
   ;;
 
   let get_first_language_from_title (title : string) =
-    let editions_page =
-      Book_fetch.Fetcher.Search_by_name.fetch_edition_language_page title
-    in
     let valid_language =
       Or_error.try_with (fun () ->
-        Page_parser.Search_page.get_first_language_from_json editions_page)
+        Book_fetch.Fetcher.Search_by_name.fetch_edition_language_page title
+        |> Page_parser.Search_page.get_first_language_from_json)
     in
     match valid_language with Ok lang -> lang | Error _ -> "eng"
   ;;
