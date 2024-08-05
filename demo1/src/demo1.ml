@@ -9,5 +9,6 @@ let command =
     ; "parse", Page_parser.command
     ; "run", Reader_input.command
     ; "google-api", Google_api.command
+    ; "cache", Cache.command
     ]
 ;;

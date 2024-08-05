@@ -2,9 +2,8 @@ open! Core
 open Async
 
 type t =
-  { mutable stored_subjects : Set.Make(String).t
-      (* names of the subjects stored*)
-  ; size : int (* number of subjects stored*)
+  { mutable stored_subjects : String.Set.t (* names of the subjects stored*)
+  ; _size : int (* number of subjects stored*)
   }
 
 let is_in_cache t subject = Set.mem t.stored_subjects subject
@@ -25,8 +24,22 @@ let get_from_cache t subject =
   return text
 ;;
 
+let write_file =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:"Given a subject writes it to cache"
+    [%map_open
+      let subject = flag "subject" (required string) ~doc:"Subject" in
+      fun () ->
+        let fetched_file = Book_fetch.Fetcher.Subjects.fetch_sub subject in
+        let sub =
+          { stored_subjects = String.Set.of_list [ "hi" ]; _size = 0 }
+        in
+        get_from_cache sub fetched_file |> ignore]
+;;
+
 let command =
   Command.group
     ~summary:"Parse Open Library Data"
-    [ "books-from-subject", get_from_cache ]
+    [ "write-to-cache", write_file ]
 ;;
