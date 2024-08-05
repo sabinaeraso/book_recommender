@@ -58,7 +58,7 @@ module Fetcher = struct
 
     let create_edition_search_url (title : string) =
       prefix
-      ^ "search.json/q="
+      ^ "search.json?q="
       ^ format_name title
       ^ "&fields=key,title,author_name,editions,editions.key,editions.title,editions.ebook_access,editions.language"
     ;;

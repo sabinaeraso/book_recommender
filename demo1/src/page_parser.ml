@@ -275,8 +275,8 @@ module Search_page = struct
       let docs = find_field "docs" fields in
       (match docs with
        | `List docs_list ->
-         let first_entry = List.hd_exn docs_list in
-         (match first_entry with
+         let first_book = List.hd_exn docs_list in
+         (match first_book with
           | `Assoc entry ->
             let inner_docs = find_field "docs" entry in
             (match inner_docs with
