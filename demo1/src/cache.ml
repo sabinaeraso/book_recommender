@@ -10,9 +10,17 @@ type t =
 let is_in_cache t subject = Set.mem t.stored_subjects subject
 let check_limit t = t.size <= 1000
 
-let create_cache () =
+let create_cache () : t Deferred.t =
   let%bind text = Reader.file_lines "cache/all_subject_titles.txt" in
-  return text
+  return
+    { stored_subjects = String.Set.of_list text; size = List.length text }
+;;
+
+let add_subject_to_all_subject_titles (subject : string) : unit Deferred.t =
+  let%bind () =
+    Writer.save_lines "cache/all_subject_titles.txt" [ subject ]
+  in
+  return ()
 ;;
 
 let write_to_cache t subject =
@@ -29,7 +37,7 @@ let write_to_cache t subject =
     | Ok _ ->
       t.stored_subjects <- Set.add t.stored_subjects subject;
       t.size <- t.size + 1;
-      return ()
+      add_subject_to_all_subject_titles subject
     | Error _ -> return ())
   else return ()
 ;;
@@ -56,9 +64,7 @@ let write_file =
     [%map_open
       let subject = flag "subject" (required string) ~doc:"Subject" in
       fun () ->
-        let sub =
-          { stored_subjects = String.Set.of_list [ "hi" ]; size = 0 }
-        in
+        let%bind.Deferred sub = create_cache () in
         let%bind.Deferred text = get_from_cache sub subject in
         print_endline text;
         Deferred.return ()]
