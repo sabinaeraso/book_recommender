@@ -1,5 +1,6 @@
 open! Core
 
+val parse_from_string : string -> Yojson.Safe.t
 val find_field : string -> (string * Yojson.Safe.t) list -> Yojson.Safe.t
 
 val find_field_option
