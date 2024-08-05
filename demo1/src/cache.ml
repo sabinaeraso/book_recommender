@@ -19,9 +19,10 @@ let write_to_cache t subject =
    calling Writer.save*)
 
 let get_from_cache t subject =
+  let open Deferred.Let_syntax in
   if not (is_in_cache t subject) then write_to_cache t subject;
-  let%bind text = Reader.file_contents (subject ^ ".txt") in
-  return text
+  let%map text = Reader.file_contents (subject ^ ".txt") in
+  text
 ;;
 
 let write_file =
