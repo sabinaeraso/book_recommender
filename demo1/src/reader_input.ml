@@ -31,8 +31,7 @@ let rec get_origin_book () =
   in
   match valid with
   | Ok book -> return book
-  | Error err ->
-    print_endline (Error.to_string_hum err);
+  | Error _ ->
     print_endline
       "Could not find book of that title please try different title! \n";
     get_origin_book ()
@@ -75,7 +74,6 @@ let get_author_name (current_book : Book.t) =
 ;;
 
 let get_user_response (state : Book_recommender.State.t) =
-  print_endline "entered";
   let current_book = state.current_book in
   let current_title = current_book.title in
   let description = get_valid_description current_book in

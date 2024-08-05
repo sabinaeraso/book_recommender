@@ -40,6 +40,7 @@ module Curl = struct
     let fail error = failwithf "Curl failed on %s: %s" url error () in
     try
       let connection = Curl.init () in
+      Curl.set_timeout connection 15;
       Curl.set_errorbuffer connection error_buffer;
       Curl.set_writefunction connection (writer result);
       Curl.set_followlocation connection true;
