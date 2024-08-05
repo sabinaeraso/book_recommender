@@ -126,7 +126,7 @@ let rec run_recommender (n : float) (state : Book_recommender.State.t) =
 let run () =
   print_endline "Please input the name of your favorite book: ";
   let%bind origin_book = get_origin_book () in
-  let state = Book_recommender.State.empty_state origin_book in
+  let%bind state = Book_recommender.State.empty_state origin_book in
   Handle.handle_read_yes 1.0 ~state;
   run_recommender 2.0 state
 ;;

@@ -1,4 +1,5 @@
 open! Core
+open Async
 
 module State : sig
   type t =
@@ -12,7 +13,7 @@ module State : sig
   [@@deriving sexp_of, fields ~getters]
   (* dont expose the type t and only mutate from this file *)
 
-  val empty_state : Book.t -> t
+  val empty_state : Book.t -> t Deferred.t
 end
 
 val update_current_book : state:State.t -> new_book:Book.t -> unit
@@ -26,7 +27,7 @@ val update_to_visit_from_subject
   :  float
   -> state:State.t
   -> subject:string
-  -> unit
+  -> unit Deferred.t
 
 (*takes in the current state and returns the next book to be returned by
   popping it off of the to_visit binary heap*)

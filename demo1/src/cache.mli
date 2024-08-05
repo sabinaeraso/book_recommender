@@ -1,4 +1,5 @@
 open! Core
+open Async
 
 type t =
   { mutable stored_subjects : String.Set.t (* names of the subjects stored*)
@@ -6,7 +7,7 @@ type t =
   }
 [@@deriving sexp_of, fields ~getters]
 
-val create_cache : unit -> t
-val write_to_cache : t -> string -> unit
-val get_from_cache : t -> string -> string
+val create_cache : unit -> t Deferred.t
+val write_to_cache : t -> string -> unit Deferred.t
+val get_from_cache : t -> string -> string Deferred.t
 val command : Command.t

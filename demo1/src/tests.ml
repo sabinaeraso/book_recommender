@@ -1,4 +1,5 @@
 open! Core
+open Async
 
 let%expect_test "Get books from subject: Action & Adventure" =
   let dummy =
@@ -11,12 +12,14 @@ let%expect_test "Get books from subject: Action & Adventure" =
       ~isbn:None
       ~publish_date:None
   in
-  let state = Book_recommender.State.empty_state dummy in
-  Book_recommender.update_to_visit_from_subject
-    1.0
-    ~state
-    ~subject:"Action & Adventure";
-  Book.Binary_heap.iter (fun book -> Book.print book) state.to_visit
+  let%bind state = Book_recommender.State.empty_state dummy in
+  let%bind () =
+    Book_recommender.update_to_visit_from_subject
+      1.0
+      ~state
+      ~subject:"Action & Adventure"
+  in
+  return (Book.Binary_heap.iter (fun book -> Book.print book) state.to_visit)
 ;;
 
 let%expect_test "Get next book from Tooth Fairy subject original queue" =
@@ -30,14 +33,16 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
       ~isbn:None
       ~publish_date:None
   in
-  let state = Book_recommender.State.empty_state dummy in
-  Book_recommender.update_to_visit_from_subject
-    1.0
-    ~state
-    ~subject:"tooth_fairy";
+  let%bind state = Book_recommender.State.empty_state dummy in
+  let%bind () =
+    Book_recommender.update_to_visit_from_subject
+      1.0
+      ~state
+      ~subject:"tooth_fairy"
+  in
   let next_book = Book_recommender.get_next_book ~state in
   print_s [%message (state : Book_recommender.State.t)];
-  Book.print next_book
+  return (Book.print next_book)
 ;;
 
 let%expect_test "Remove and Update Heap" =
@@ -118,5 +123,5 @@ let%expect_test "Remove and Update Heap" =
     book_four.heuristic <- 1.0;
     Book.Binary_heap.heapify_after_update_at_index book_four heap index;
     printf "New heap:";
-    print_s [%message (heap : Book.Binary_heap.t)]
+    return (print_s [%message (heap : Book.Binary_heap.t)])
 ;;

@@ -1,4 +1,5 @@
 open! Core
+open Async
 
 module State = struct
   type t =
@@ -22,13 +23,14 @@ module State = struct
         ~isbn:(Some 1)
         ~publish_date:None
     in
+    let%map new_cache = Cache.create_cache () in
     let state =
       { visited_books = []
       ; to_visit = Book.Binary_heap.create ~dummy 40
       ; recommendations = []
       ; current_book = book
       ; visited_subjects = []
-      ; cache = Cache.create_cache ()
+      ; cache = new_cache
       }
     in
     state
@@ -85,28 +87,30 @@ let update_to_visit_from_subject
     print_endline subject;
     state.visited_subjects
     <- List.append state.visited_subjects [ String.lowercase subject ];
-    let books =
+    let%bind books =
       Open_library.Fetch_and_parse.get_books_from_subject state.cache subject
     in
-    List.iter books ~f:(fun (book : Book.t) ->
-      let key = book.ol_id in
-      if not
-           (List.exists state.visited_books ~f:(fun visited_key ->
-              equal 0 (Book.OL_Id.compare visited_key key)))
-      then (
-        match Book.Binary_heap.find_index to_visit ~key with
-        | Some index ->
-          let array = Book.Binary_heap.data to_visit in
-          let instance = Array.get array index in
-          make_heuristic_change
-            state.current_book
-            instance
-            distance_from_origin;
-          Book.Binary_heap.heapify_after_update_at_index
-            instance
-            to_visit
-            index
-        | None -> Book.Binary_heap.add to_visit book)))
+    return
+      (List.iter books ~f:(fun (book : Book.t) ->
+         let key = book.ol_id in
+         if not
+              (List.exists state.visited_books ~f:(fun visited_key ->
+                 equal 0 (Book.OL_Id.compare visited_key key)))
+         then (
+           match Book.Binary_heap.find_index to_visit ~key with
+           | Some index ->
+             let array = Book.Binary_heap.data to_visit in
+             let instance = Array.get array index in
+             make_heuristic_change
+               state.current_book
+               instance
+               distance_from_origin;
+             Book.Binary_heap.heapify_after_update_at_index
+               instance
+               to_visit
+               index
+           | None -> Book.Binary_heap.add to_visit book))))
+  else return ()
 ;;
 
 let rec get_next_book ~(state : State.t) =

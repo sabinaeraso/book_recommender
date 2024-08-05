@@ -1,9 +1,10 @@
 open! Core
+open Async
 
 module Fetch_and_parse = struct
   let get_books_from_subject (cache : Cache.t) (subject : string) =
-    Cache.get_from_cache cache subject
-    |> Page_parser.Subject_page.parse_books
+    let%bind raw_file = Cache.get_from_cache cache subject in
+    return (Page_parser.Subject_page.parse_books raw_file)
   ;;
 
   let get_book_from_key (key : string) =
