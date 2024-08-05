@@ -26,7 +26,6 @@ module Fetcher = struct
         match limit with None -> start | Some lim -> add_limit start lim
       in
       let result = File_fetcher.fetch_exn Remote ~resource:url in
-      (* print_endline result; *)
       result
     ;;
   end

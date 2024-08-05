@@ -75,6 +75,7 @@ let get_author_name (current_book : Book.t) =
 ;;
 
 let get_user_response (state : Book_recommender.State.t) =
+  print_endline "entered";
   let current_book = state.current_book in
   let current_title = current_book.title in
   let description = get_valid_description current_book in
