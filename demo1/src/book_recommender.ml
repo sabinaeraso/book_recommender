@@ -7,6 +7,7 @@ module State = struct
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
     ; mutable visited_subjects : string list
+    ; mutable cache : Cache.t
     }
   [@@deriving sexp_of, fields ~getters]
 
@@ -27,6 +28,7 @@ module State = struct
       ; recommendations = []
       ; current_book = book
       ; visited_subjects = []
+      ; cache = Cache.create_cache ()
       }
     in
     state
@@ -84,7 +86,7 @@ let update_to_visit_from_subject
     state.visited_subjects
     <- List.append state.visited_subjects [ String.lowercase subject ];
     let books =
-      Open_library.Fetch_and_parse.get_books_from_subject subject
+      Open_library.Fetch_and_parse.get_books_from_subject state.cache subject
     in
     List.iter books ~f:(fun (book : Book.t) ->
       let key = book.ol_id in

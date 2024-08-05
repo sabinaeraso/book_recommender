@@ -7,6 +7,7 @@ module State : sig
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
     ; mutable visited_subjects : string list
+    ; mutable cache : Cache.t
     }
   [@@deriving sexp_of, fields ~getters]
   (* dont expose the type t and only mutate from this file *)
