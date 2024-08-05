@@ -34,7 +34,8 @@ let write_to_cache t subject =
         Writer.save ("cache/" ^ subject ^ ".txt") ~contents:raw_subject_page)
     in
     match valid_file with
-    | Ok _ ->
+    | Ok file_has_been_written ->
+      let%bind () = file_has_been_written in
       t.stored_subjects <- Set.add t.stored_subjects subject;
       t.size <- t.size + 1;
       add_subject_to_all_subject_titles subject
