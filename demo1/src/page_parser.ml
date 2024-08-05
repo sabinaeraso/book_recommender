@@ -278,24 +278,34 @@ module Search_page = struct
          let first_book = List.hd_exn docs_list in
          (match first_book with
           | `Assoc entry ->
-            let inner_docs = find_field "docs" entry in
-            (match inner_docs with
-             | `List inner_docs_list ->
-               let this_doc = List.hd_exn inner_docs_list in
-               (match this_doc with
-                | `Assoc inner_doc ->
-                  let language = find_field "language" inner_doc in
-                  (match language with
-                   | `List language_list ->
-                     List.hd_exn language_list
-                     |> Yojson.Safe.to_string
-                     |> format_field
-                   | _ -> failwith "no language")
-                | _ -> failwith "no inner doc")
-             | _ -> failwith "no inner docs")
-          | _ -> failwith "No entries in first doc")
-       | _ -> failwith "no outer docs")
-    | _ -> failwith "Was not properly formatted"
+            let editions = find_field "editions" entry in
+            (match editions with
+             | `Assoc e ->
+               let inner_docs = find_field "docs" e in
+               (match inner_docs with
+                | `List inner_docs_list ->
+                  let this_doc = List.hd_exn inner_docs_list in
+                  (match this_doc with
+                   | `Assoc book ->
+                     let language = find_field "language" book in
+                     (match language with
+                      | `List language_list ->
+                        let first_lang = List.hd_exn language_list in
+                        let string_first_lang =
+                          Yojson.Safe.to_string first_lang
+                        in
+                        let formatted_lang =
+                          format_field string_first_lang
+                        in
+                        print_endline formatted_lang;
+                        formatted_lang
+                      | _ -> failwith "no language")
+                   | _ -> failwith "no inner doc")
+                | _ -> failwith "no edition")
+             | _ -> failwith "")
+          | _ -> failwith "no entry")
+       | _ -> failwith "no inner docs")
+    | _ -> failwith "No entries in first doc"
   ;;
 end
 
@@ -326,10 +336,27 @@ let find_book_by_name =
         print_s [%sexp (Search_page.parse_searches fetched_file : Book.t)]]
 ;;
 
+let first_language_from_title =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:"Given a book title, tries to find it"
+    [%map_open
+      let title = flag "title" (required string) ~doc:"Tintenherz" in
+      fun () ->
+        let fetched_file =
+          Book_fetch.Fetcher.Search_by_name.fetch_edition_language_page title
+        in
+        let first_language =
+          Search_page.get_first_language_from_json fetched_file
+        in
+        print_endline first_language]
+;;
+
 let command =
   Command.group
     ~summary:"Parse Open Library Data"
     [ "books-from-subject", fetch_books_by_subject
     ; "book-from-name", find_book_by_name
+    ; "first-language", first_language_from_title
     ]
 ;;
