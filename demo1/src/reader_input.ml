@@ -38,7 +38,7 @@ let rec get_origin_book () =
     get_origin_book ()
 ;;
 
-let _get_valid_description (current_book : Book.t) =
+let get_valid_description (current_book : Book.t) =
   let valid_desc =
     Or_error.try_with (fun () ->
       Page_parser.Book_page.get_book_description
@@ -60,7 +60,7 @@ let _get_valid_description (current_book : Book.t) =
   description
 ;;
 
-let _get_author_name (current_book : Book.t) =
+let get_author_name (current_book : Book.t) =
   match current_book.author with
   | Some name -> name
   | None ->
@@ -78,8 +78,8 @@ let get_user_response (state : Book_recommender.State.t) =
   print_endline "entered";
   let current_book = state.current_book in
   let current_title = current_book.title in
-  let description = (*get_valid_description current_book*) "" in
-  let author_name = (*get_author_name current_book*) "" in
+  let description = get_valid_description current_book in
+  let author_name = get_author_name current_book in
   let published =
     match current_book.publish_date with
     | None -> "No publish date"

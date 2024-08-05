@@ -78,14 +78,14 @@ let update_to_visit_from_subject
   let to_visit = state.to_visit in
   if not
        (List.exists state.visited_subjects ~f:(fun s ->
-          String.equal (String.lowercase s) (String.lowercase subject)))
+          String.equal s (String.lowercase subject)))
   then (
     print_endline subject;
-    state.visited_subjects <- List.append state.visited_subjects [ subject ];
+    state.visited_subjects
+    <- List.append state.visited_subjects [ String.lowercase subject ];
     let books =
       Open_library.Fetch_and_parse.get_books_from_subject subject
     in
-    (*List.iter books ~f:(fun book -> Book.print book); *)
     List.iter books ~f:(fun (book : Book.t) ->
       let key = book.ol_id in
       if not
@@ -107,19 +107,14 @@ let update_to_visit_from_subject
         | None -> Book.Binary_heap.add to_visit book)))
 ;;
 
-let rec get_next_book ~(state : State.t) =
+let (*rec*) get_next_book ~(state : State.t) =
   let new_book = Book.Binary_heap.pop_minimum state.to_visit in
-  let language =
-    Open_library.Fetch_and_parse.get_first_language_from_title new_book.title
-  in
-  if String.equal language "eng"
-  then (
-    update_visited ~state ~book:new_book;
-    print_endline "Book in english:";
-    print_s [%message (new_book.title : string)];
-    new_book)
-  else (
-    print_endline "Book not in english:";
-    print_s [%message (new_book.title : string)];
-    get_next_book ~state)
+  update_visited ~state ~book:new_book;
+  new_book
 ;;
+(* let language = Open_library.Fetch_and_parse.get_first_language_from_title
+   new_book.title in if String.equal language "eng" then ( update_visited
+   ~state ~book:new_book; print_endline "Book in english:"; print_s [%message
+   (new_book.title : string)]; new_book) else ( print_endline "Book not in
+   english:"; print_s [%message (new_book.title : string)]; get_next_book
+   ~state) *)
