@@ -58,7 +58,7 @@ let is_in_cache t subject = Set.mem t.stored_subjects subject
 let write_to_cache t subject =
   t.stored_subjects <- Set.add t.stored_subjects subject;
   let raw_subject_page =
-    Book_fetch.Fetcher.Subjects.fetch_sub ~limit:1000 subject
+    Book_fetch.Fetcher.Subjects.fetch_sub ~limit:1001 subject
   in
   Writer.save ("cache/" ^ subject ^ ".txt") ~contents:raw_subject_page
 ;;
