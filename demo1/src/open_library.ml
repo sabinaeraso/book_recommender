@@ -33,10 +33,6 @@ module Fetch_and_parse = struct
       Or_error.try_with (fun () ->
         Page_parser.Search_page.get_first_language_from_json editions_page)
     in
-    match valid_language with
-    | Ok lang -> lang
-    | Error _ ->
-      print_endline title;
-      failwith "no language found"
+    match valid_language with Ok lang -> lang | Error _ -> "eng"
   ;;
 end
