@@ -5,9 +5,15 @@ type t =
   { mutable stored_subjects : String.Set.t (* names of the subjects stored*)
   ; mutable size : int (* number of subjects stored*)
   }
+[@@deriving sexp_of, fields ~getters]
 
 let is_in_cache t subject = Set.mem t.stored_subjects subject
 let check_limit t = t.size <= 1000
+
+let create_cache () =
+  let%bind text = Reader.file_lines "cache/all_subject_titles.txt" in
+  return text
+;;
 
 let write_to_cache t subject =
   if check_limit t
