@@ -1,8 +1,8 @@
 open! Core
 
 module Fetch_and_parse = struct
-  let get_books_from_subject (subject : string) =
-    Book_fetch.Fetcher.Subjects.fetch_sub subject ~limit:500
+  let get_books_from_subject (cache : Cache.t) (subject : string) =
+    Cache.get_from_cache cache subject
     |> Page_parser.Subject_page.parse_books
   ;;
 
