@@ -35,6 +35,8 @@ module Fetch_and_parse = struct
     in
     match valid_language with
     | Ok lang -> lang
-    | Error _ -> failwith "no language found"
+    | Error _ ->
+      print_endline title;
+      failwith "no language found"
   ;;
 end

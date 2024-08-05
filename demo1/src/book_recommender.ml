@@ -2,7 +2,7 @@ open! Core
 
 module State = struct
   type t =
-    { mutable visited_books : Book.Google_Id.t list
+    { mutable visited_books : Book.OL_Id.t list
     ; to_visit : Book.Binary_heap.t
     ; mutable recommendations : Book.t list
     ; mutable current_book : Book.t
@@ -38,7 +38,7 @@ let update_current_book ~(state : State.t) ~new_book =
 ;;
 
 let update_visited ~(state : State.t) ~(book : Book.t) =
-  state.visited_books <- List.append state.visited_books [ book.google_id ]
+  state.visited_books <- List.append state.visited_books [ book.ol_id ]
 ;;
 
 let update_recommendations ~(state : State.t) ~(book : Book.t) =

@@ -69,7 +69,6 @@ let handle_read_yes distance_from_origin ~(state : Book_recommender.State.t) =
   Book_recommender.update_visited ~state ~book;
   let subjects =
     Open_library.Fetch_and_parse.get_subjects_from_key book.ol_id
-    (* book.subjects *)
   in
   List.iter subjects ~f:(fun subject ->
     let valid_subject =
