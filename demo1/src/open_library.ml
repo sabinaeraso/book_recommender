@@ -9,7 +9,13 @@ module Fetch_and_parse = struct
       | Some file -> file
       | None -> Book_fetch.Fetcher.Subjects.fetch_sub ~limit:500 subject
     in
-    return (Page_parser.Subject_page.parse_books fetched)
+    let valid_subject_parse =
+      Or_error.try_with (fun () ->
+        Page_parser.Subject_page.parse_books fetched)
+    in
+    match valid_subject_parse with
+    | Ok subjects -> return subjects
+    | Error _ -> return []
   ;;
 
   let get_book_from_key (key : string) =
