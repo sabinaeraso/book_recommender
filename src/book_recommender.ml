@@ -121,11 +121,6 @@ let rec get_next_book ~(state : State.t) =
   if String.equal language "eng"
   then (
     update_visited ~state ~book:new_book;
-    print_endline "Book in english:";
-    print_s [%message (new_book.title : string)];
     new_book)
-  else (
-    print_endline "Book not in\n   english:";
-    print_s [%message (new_book.title : string)];
-    get_next_book ~state)
+  else get_next_book ~state
 ;;

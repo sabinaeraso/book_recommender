@@ -2,8 +2,8 @@ open! Core
 open Async
 
 type t =
-  { mutable stored_subjects : String.Set.t (* names of the subjects stored*)
-  ; mutable size : int (* number of subjects stored*)
+  { mutable stored_subjects : String.Set.t
+  ; mutable size : int
   }
 [@@deriving sexp_of, fields ~getters]
 
@@ -17,7 +17,7 @@ let is_in_cache t subject =
   Set.mem t.stored_subjects (format_filename subject)
 ;;
 
-let check_limit t = t.size <= 1000
+let below_limit t = t.size <= 1000
 
 let properly_formatted_subject (subject : string) =
   let banned_symbols =
@@ -74,7 +74,7 @@ let add_subject_to_all_subject_titles (subject : string) : unit Deferred.t =
 
 let write_to_cache t subject =
   let formatted_subject = format_filename subject in
-  if check_limit t
+  if below_limit t
   then (
     let valid_file =
       Or_error.try_with (fun () ->
@@ -97,14 +97,7 @@ let write_to_cache t subject =
   else return false
 ;;
 
-(* need to ensure that the subject is already a created empty file before
-   calling Writer.save*)
-
 let get_from_cache t subject =
-  (* Deferred.bind (if not (is_in_cache t subject) then ( let%bind () =
-     write_to_cache t subject in return ()) else return ()) ~f:(fun () ->
-     let%bind text = Reader.file_contents ("cache/" ^ subject ^ ".txt") in
-     return text) *)
   let formatted_subject = format_filename subject in
   if is_in_cache t formatted_subject
   then (
@@ -112,7 +105,7 @@ let get_from_cache t subject =
       Reader.file_contents ("cache/" ^ formatted_subject ^ ".txt")
     in
     return (Some text))
-  else if check_limit t && properly_formatted_subject formatted_subject
+  else if below_limit t && properly_formatted_subject formatted_subject
   then (
     let%bind wrote_to_cache = write_to_cache t subject in
     if wrote_to_cache
