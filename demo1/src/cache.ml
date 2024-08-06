@@ -81,6 +81,7 @@ let write_to_cache t subject =
         let raw_subject_page =
           Book_fetch.Fetcher.Subjects.fetch_sub ~limit:1000 subject
         in
+        let _parsed = Page_parser.parse_from_string raw_subject_page in
         Writer.save
           ("cache/" ^ formatted_subject ^ ".txt")
           ~contents:raw_subject_page)
@@ -90,9 +91,10 @@ let write_to_cache t subject =
       let%bind () = file_has_been_written in
       t.stored_subjects <- Set.add t.stored_subjects formatted_subject;
       t.size <- t.size + 1;
-      add_subject_to_all_subject_titles formatted_subject
-    | Error _ -> return ())
-  else return ()
+      let%bind () = add_subject_to_all_subject_titles formatted_subject in
+      return true
+    | Error _ -> return false)
+  else return false
 ;;
 
 (* need to ensure that the subject is already a created empty file before
@@ -112,11 +114,14 @@ let get_from_cache t subject =
     return (Some text))
   else if check_limit t && properly_formatted_subject formatted_subject
   then (
-    let%bind () = write_to_cache t subject in
-    let%bind text =
-      Reader.file_contents ("cache/" ^ formatted_subject ^ ".txt")
-    in
-    return (Some text))
+    let%bind wrote_to_cache = write_to_cache t subject in
+    if wrote_to_cache
+    then (
+      let%bind text =
+        Reader.file_contents ("cache/" ^ formatted_subject ^ ".txt")
+      in
+      return (Some text))
+    else return None)
   else return None
 ;;
 
