@@ -3,8 +3,13 @@ open Async
 
 module Fetch_and_parse = struct
   let get_books_from_subject (cache : Cache.t) (subject : string) =
-    let%bind raw_file = Cache.get_from_cache cache subject in
-    return (Page_parser.Subject_page.parse_books raw_file)
+    let%bind cached_file = Cache.get_from_cache cache subject in
+    let fetched =
+      match cached_file with
+      | Some file -> file
+      | None -> Book_fetch.Fetcher.Subjects.fetch_sub ~limit:1000 subject
+    in
+    return (Page_parser.Subject_page.parse_books fetched)
   ;;
 
   let get_book_from_key (key : string) =

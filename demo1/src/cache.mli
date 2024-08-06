@@ -9,5 +9,5 @@ type t =
 
 val create_cache : unit -> t Deferred.t
 val write_to_cache : t -> string -> unit Deferred.t
-val get_from_cache : t -> string -> string Deferred.t
+val get_from_cache : t -> string -> string option Deferred.t
 val command : Command.t
