@@ -7,7 +7,7 @@ module Fetch_and_parse = struct
     let fetched =
       match cached_file with
       | Some file -> file
-      | None -> Book_fetch.Fetcher.Subjects.fetch_sub ~limit:1000 subject
+      | None -> Book_fetch.Fetcher.Subjects.fetch_sub ~limit:500 subject
     in
     return (Page_parser.Subject_page.parse_books fetched)
   ;;

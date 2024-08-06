@@ -108,9 +108,9 @@ let get_user_response (state : Book_recommender.State.t) =
 let handle_not_done message n ~state =
   match message with
   | Message.Interested -> Handle.handle_yes n ~state
-  | Not_Interested -> Handle.handle_no ~state
+  | Not_Interested -> return (Handle.handle_no ~state)
   | Read_liked -> Handle.handle_read_yes n ~state
-  | Read_didnt_like -> Handle.handle_no ~state
+  | Read_didnt_like -> return (Handle.handle_no ~state)
   | _ -> failwith "shouldnt have called this handle with that message "
 ;;
 
@@ -119,7 +119,7 @@ let rec run_recommender (n : float) (state : Book_recommender.State.t) =
   match response with
   | Done -> return (Handle.handle_done ~state)
   | _ ->
-    handle_not_done response n ~state;
+    let%bind () = handle_not_done response n ~state in
     run_recommender (n +. 1.0) state
 ;;
 
@@ -127,7 +127,7 @@ let run () =
   print_endline "Please input the name of your favorite book: ";
   let%bind origin_book = get_origin_book () in
   let%bind state = Book_recommender.State.empty_state origin_book in
-  Handle.handle_read_yes 1.0 ~state;
+  let%bind () = Handle.handle_read_yes 1.0 ~state in
   run_recommender 2.0 state
 ;;
 
