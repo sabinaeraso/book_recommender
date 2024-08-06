@@ -3,3 +3,8 @@ orphans
 foster_homes
 fantasy
 adventure
+magic
+wizards
+schools
+hogwarts_school_of_witchcraft_and_wizardry_(imaginary_place)
+witches

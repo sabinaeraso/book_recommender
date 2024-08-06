@@ -92,15 +92,15 @@ let find_field_option
     if String.equal name field_name then Some key else None)
 ;;
 
-let parse_author (authors : Yojson.Safe.t) : Yojson.Safe.t =
+let parse_author (authors : Yojson.Safe.t) : Yojson.Safe.t option =
   match authors with
   | `List author_list ->
     (match List.hd author_list with
      | Some author_map ->
        (match author_map with
-        | `Assoc fields -> find_field "name" fields
+        | `Assoc fields -> Some (find_field "name" fields)
         | _ -> failwith "Author field not association list")
-     | None -> failwith "No authors in list")
+     | None -> None)
   | _ -> failwith "Not properly formatted author field"
 ;;
 
@@ -123,8 +123,11 @@ let make_book_from_json (book_info : Yojson.Safe.t) : Book.t =
     let author =
       List.find_map fields ~f:(fun (name, author) ->
         if String.equal name "authors"
-        then
-          Some (format_field (Yojson.Safe.to_string (parse_author author)))
+        then (
+          match parse_author author with
+          | Some auth_json ->
+            Some (format_field (Yojson.Safe.to_string auth_json))
+          | None -> None)
         else None)
     in
     let publish_date = get_publish_year fields in
@@ -189,8 +192,11 @@ module Book_page = struct
       let author =
         List.find_map fields ~f:(fun (name, author) ->
           if String.equal name "authors"
-          then
-            Some (format_field (Yojson.Safe.to_string (parse_author author)))
+          then (
+            match parse_author author with
+            | Some auth_json ->
+              Some (format_field (Yojson.Safe.to_string auth_json))
+            | None -> None)
           else None)
       in
       let publish_date = get_publish_year fields in
