@@ -12,6 +12,7 @@ val format_field : string -> string
 
 module Subject_page : sig
   val parse_books : string -> Book.t list
+  val get_work_count : string -> int
 end
 
 module Book_page : sig

@@ -181,6 +181,16 @@ module Subject_page = struct
   let parse_books (raw_page : string) : Book.t list =
     get_works_list (parse_from_string raw_page)
   ;;
+
+  let get_work_count (raw_page : string) : int =
+    let json = parse_from_string raw_page in
+    match json with
+    | `Assoc fields ->
+      (match find_field "work_count" fields with
+       | `Int count -> count
+       | _ -> failwith "work count was not an int")
+    | _ -> failwith "not a proper formatted OL json"
+  ;;
 end
 
 module Book_page = struct
