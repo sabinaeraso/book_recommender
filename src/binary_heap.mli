@@ -29,6 +29,8 @@ module type S = sig
   (** [is_empty h] checks the emptiness of [h] *)
   val is_empty : t -> bool
 
+  (*val index_map : t -> int Core.String.Table.t *)
+
   (** [add x h] adds a new element [x] in heap [h]; complexity O(log(n)). *)
   val add : t -> Value.t -> unit
 

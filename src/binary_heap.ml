@@ -32,6 +32,7 @@ module type S = sig
   (** [is_empty h] checks the emptiness of [h] *)
   val is_empty : t -> bool
 
+  (* val index_map : t -> int Core.String.Table.t *)
 
   (** [add x h] adds a new element [x] in heap [h]; complexity O(log(n)). *)
   val add : t -> Value.t -> unit
@@ -95,6 +96,7 @@ module Make (X : Ordered) = struct
   let length h = h.size
   let is_empty h = h.size = 0
 
+  let _index_map h = h.index_map
 
 
   (* [enlarge] doubles the size of [data] *)

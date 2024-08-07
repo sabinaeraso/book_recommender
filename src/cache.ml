@@ -6,7 +6,7 @@ module Cache_item = struct
     { title : string
     ; work_count : int
     }
-  [@@deriving sexp, fields ~getters, compare]
+  [@@deriving sexp, fields ~getters, compare, hash]
 
   let compare_by_work_count =
     Comparable.lift Int.compare ~f:(fun cache_item -> cache_item.work_count)
@@ -46,7 +46,7 @@ let is_in_cache t subject =
   | None -> false
 ;;
 
-let limit = 40
+let limit = 45
 let below_limit t = t.size < limit
 
 let properly_formatted_subject (subject : string) =
@@ -121,16 +121,22 @@ let add_subject_and_work_count_to_all_subject_titles
   return ()
 ;;
 
-let update_cache_file
-  (heap_of_cache : Cache_item.Binary_heap.t)
+let override_cache_file (heap_of_cache : Cache_item.Binary_heap.t)
   : unit Deferred.t
   =
   let%bind () = Writer.save_lines "cache/all_subject_titles.txt" [] in
-  Cache_item.Binary_heap.iter (fun item -> ) heap_of_cache
+  let subject_map = Hashtbl.create (module String) in
+  Cache_item.Binary_heap.iter
+    (fun item ->
+      Hashtbl.add_exn subject_map ~key:item.title ~data:item.work_count)
+    heap_of_cache;
+  let assoc_list = Hashtbl.to_alist subject_map in
+  let lines_list =
+    List.map assoc_list ~f:(fun (title, work_count) ->
+      title ^ " " ^ Int.to_string work_count)
+  in
   let%bind () =
-    Writer.save_lines
-      "cache/all_subject_titles.txt"
-      ([ cache_item.title ^ " " ^ Int.to_string cache_item.work_count ])
+    Writer.save_lines "cache/all_subject_titles.txt" lines_list
   in
   return ()
 ;;
@@ -147,8 +153,9 @@ let replace_min_subject t (cache_item : Cache_item.t) =
     Core.print_endline "replaced with";
     Core.print_s [%sexp (cache_item : Cache_item.t)];
     Sys_unix.remove ("cache/" ^ current_min_title ^ ".txt");
-    t.size <- t.size - 1)
-  else ()
+    let%bind () = override_cache_file t.stored_subjects in
+    return (t.size <- t.size - 1))
+  else return ()
 ;;
 
 let write_to_cache t raw_subject_page formatted_subject =
@@ -157,7 +164,13 @@ let write_to_cache t raw_subject_page formatted_subject =
       ~title:formatted_subject
       ~work_count:(Page_parser.Subject_page.get_work_count raw_subject_page)
   in
-  if equal t.size limit then replace_min_subject t cache_item;
+  let%bind () =
+    if equal t.size limit
+    then (
+      let%bind () = replace_min_subject t cache_item in
+      return ())
+    else return ()
+  in
   if below_limit t
   then (
     match%bind
