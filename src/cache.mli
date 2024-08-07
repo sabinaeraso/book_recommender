@@ -1,11 +1,23 @@
 open! Core
 open Async
 
+module Cache_item : sig
+  type t =
+    { title : string
+    ; work_count : int
+    }
+  [@@deriving sexp, fields ~getters, compare]
+
+  val create : title:string -> work_count:int -> t
+
+  module Binary_heap : Binary_heap.S with type Value.t = t
+end
+
 type t =
-  { mutable stored_subjects : String.Set.t (* names of the subjects stored*)
-  ; mutable size : int (* number of subjects stored*)
+  { mutable stored_subjects : Cache_item.Binary_heap.t
+  ; mutable size : int
   }
-[@@deriving sexp_of, fields ~getters]
+[@@deriving sexp, fields ~getters]
 
 (* creates a new cache instance by parsing the information in
    all_subject_titles.txt *)

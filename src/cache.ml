@@ -1,11 +1,34 @@
 open! Core
 open Async
 
+module Cache_item = struct
+  type t =
+    { title : string
+    ; work_count : int
+    }
+  [@@deriving sexp, fields ~getters, compare]
+
+  let compare_by_work_count =
+    Comparable.lift Int.compare ~f:(fun cache_item -> cache_item.work_count)
+  ;;
+
+  let create ~title ~work_count = { title; work_count }
+
+  module T = struct
+    type nonrec t = t [@@deriving sexp]
+
+    let compare = compare_by_work_count
+    let key = title
+  end
+
+  module Binary_heap = Binary_heap.Make (T)
+end
+
 type t =
-  { mutable stored_subjects : String.Set.t
+  { mutable stored_subjects : Cache_item.Binary_heap.t
   ; mutable size : int
   }
-[@@deriving sexp_of, fields ~getters]
+[@@deriving sexp, fields ~getters]
 
 let format_filename (subject : string) =
   String.lowercase subject
@@ -14,7 +37,9 @@ let format_filename (subject : string) =
 ;;
 
 let is_in_cache t subject =
-  Set.mem t.stored_subjects (format_filename subject)
+  Cache_item.Binary_heap.find_index
+    t.stored_subjects
+    ~key:(format_filename subject)
 ;;
 
 let below_limit t = t.size <= 1000
@@ -56,26 +81,34 @@ let properly_formatted_subject (subject : string) =
       else Continue state)
 ;;
 
-let create_cache () : t Deferred.t =
-  let%bind text = Reader.file_lines "cache/all_subject_titles.txt" in
-  return
-    { stored_subjects = String.Set.of_list text; size = List.length text }
+let get_work_count subject = 
+    
 ;;
 
-let add_subject_to_all_subject_titles (subject : string) : unit Deferred.t =
+let create_cache () : t Deferred.t =
+  let%bind text = Reader.file_lines "cache/all_subject_titles.txt" in
+  let empty_heap = Cache_item.Binary_heap.create ~dummy:({title = "dummy" ; work_count = 0}) 1000 in
+  let stored_subjects = List.fold text ~init:empty_heap ~f:(fun heap line -> 
+    let name_count = String.split line ~on:" " in 
+    let new_cache_item = {Cache_item.title = List.nth name_count 0 ; work_count = Int.of_string (List.nth name_count 1 )} in 
+    Cache_item.Binary_heap.add heap new_cache_item
+    ) in 
+  return
+    { stored_subjects; size = List.length text}
+;;
+
+let add_subject_and_work_count_to_all_subject_titles (cache_item : Cache_item.t) : unit Deferred.t =
   let%bind current_subs = Reader.file_lines "cache/all_subject_titles.txt" in
   let%bind () =
     Writer.save_lines
       "cache/all_subject_titles.txt"
-      (current_subs @ [ subject ])
+      (current_subs @ [ cache_item.title ^ " " ^ (Int.to_string cache_item.work_count) ])
   in
   return ()
 ;;
 
 let write_to_cache t subject =
   let formatted_subject = format_filename subject in
-  if below_limit t
-  then (
     let valid_file =
       Or_error.try_with (fun () ->
         let raw_subject_page =
@@ -89,17 +122,31 @@ let write_to_cache t subject =
     match valid_file with
     | Ok file_has_been_written ->
       let%bind () = file_has_been_written in
-      t.stored_subjects <- Set.add t.stored_subjects formatted_subject;
+      let cache_item = {title=formatted_subject; work_count = get_work_count raw_subject_page} in 
+      Cache_item.Binary_heap.add t.stored_subjects cache_item;
       t.size <- t.size + 1;
-      let%bind () = add_subject_to_all_subject_titles formatted_subject in
+      let%bind () = add_subject_and_work_count_to_all_subject_titles cache_item in
       return true
-    | Error _ -> return false)
-  else return false
+    | Error _ -> return false
 ;;
+
+let replace_min_subject (t:Cache.t) (subject:string) =
+  let current_min = Cache_item.Binary_heap.minimum t.stored_subjects in 
+  let current_min_title = current_min.title in 
+  let current_min_count = current_min.work_count in 
+  if (new_cache_item.work_count > current_min_count) then (
+    Cache_item.Binary_heap.pop_minimum t.stored_subjects;
+    Sys_unix.remove ("cache/" ^ current_min_title ^ ".txt") ;
+    let%bind wrote_to_cache = write_to_cache t subject in 
+    return wrote_to_cache
+  )
+else (return false ) (* there is less works in this subject than in the minimum cache subject, so we will not replace *)
+;; (* takes in a FULL cache and a new subject. if the minimum stored in the cache is SMALLER than this new subject, we repalce it with the new subject. We do this by popping the min off the cache, and removing the file from the cache directory*)
+
 
 let get_from_cache t subject =
   let formatted_subject = format_filename subject in
-  if is_in_cache t formatted_subject
+  if (is_in_cache t formatted_subject)
   then (
     let%bind text =
       Reader.file_contents ("cache/" ^ formatted_subject ^ ".txt")
@@ -115,6 +162,18 @@ let get_from_cache t subject =
       in
       return (Some text))
     else return None)
+  else if ( properly_formatted_subject formatted_subject ) (* we hit the limit, but our subject is properly formatted so she still might be added*)
+    then ( 
+      let%bind replaced_in_cache = replace_min_subject t subject in 
+      if replaced_in_cache 
+        then (
+      let%bind text =
+      Reader.file_contents ("cache/" ^ formatted_subject ^ ".txt")
+    in
+    return (Some text)
+        )
+  else (return None)
+    ) (* if this new book is successfully added to the cache, then we read it from there and return that text. otherwise, we return None *)
   else return None
 ;;
 
