@@ -46,7 +46,7 @@ let is_in_cache t subject =
   | None -> false
 ;;
 
-let limit = 45
+let limit = 1000
 let below_limit t = t.size < limit
 
 let properly_formatted_subject (subject : string) =
@@ -104,6 +104,7 @@ let create_cache () : t Deferred.t =
       Cache_item.Binary_heap.add heap new_cache_item;
       heap)
   in
+  Core.print_endline (Int.to_string (List.length text));
   return { stored_subjects; size = List.length text }
 ;;
 

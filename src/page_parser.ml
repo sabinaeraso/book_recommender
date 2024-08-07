@@ -48,6 +48,8 @@ let subject_is_valid ~subject =
     ; "children's stories"
     ; "tong hua"
     ; "deutschland"
+    ; "audiobook"
+    ; "translat"
     ]
   in
   List.fold_until
