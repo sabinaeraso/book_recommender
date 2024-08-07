@@ -4,14 +4,9 @@ open Async
 module Fetch_and_parse = struct
   let get_books_from_subject (cache : Cache.t) (subject : string) =
     let%bind cached_file = Cache.get_from_cache cache subject in
-    let fetched =
-      match cached_file with
-      | Some file -> file
-      | None -> Book_fetch.Fetcher.Subjects.fetch_sub ~limit:500 subject
-    in
     let valid_subject_parse =
       Or_error.try_with (fun () ->
-        Page_parser.Subject_page.parse_books fetched)
+        Page_parser.Subject_page.parse_books cached_file)
     in
     match valid_subject_parse with
     | Ok subjects -> return subjects
