@@ -27,6 +27,7 @@ adventure 1653
 england 3244
 magia 408
 magic 17028
+familles 1621
 witches 4194
 novela_juvenil 2602
 spouses_of_clergy 544
@@ -41,4 +42,4 @@ sagas 1008
 revenge 4916
 social_life_and_customs 186073
 magie 917
-familles 1621
+hechiceros 20
