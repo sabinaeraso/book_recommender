@@ -87,11 +87,12 @@ let get_work_count subject =
 
 let create_cache () : t Deferred.t =
   let%bind text = Reader.file_lines "cache/all_subject_titles.txt" in
-  let empty_heap = Cache_item.Binary_heap.create ~dummy:({title = "dummy" ; work_count = 0}) 1000 in
+  let empty_heap = Cache_item.Binary_heap.create ~dummy:(Cache_item.create ~title:"dummy" ~work_count:0) 1000 in
   let stored_subjects = List.fold text ~init:empty_heap ~f:(fun heap line -> 
     let name_count = String.split line ~on:" " in 
-    let new_cache_item = {Cache_item.title = List.nth name_count 0 ; work_count = Int.of_string (List.nth name_count 1 )} in 
-    Cache_item.Binary_heap.add heap new_cache_item
+    let new_cache_item = Cache_item.create ~title:(List.nth name_count 0) ~work_count:(Int.of_string (List.nth name_count 1 )) in 
+    Cache_item.Binary_heap.add heap new_cache_item; 
+    heap
     ) in 
   return
     { stored_subjects; size = List.length text}
@@ -122,7 +123,7 @@ let write_to_cache t subject =
     match valid_file with
     | Ok file_has_been_written ->
       let%bind () = file_has_been_written in
-      let cache_item = {title=formatted_subject; work_count = get_work_count raw_subject_page} in 
+      let cache_item = Cache_item.create ~title:formatted_subject ~work_count:(Page_parser.get_work_count raw_subject_page) in
       Cache_item.Binary_heap.add t.stored_subjects cache_item;
       t.size <- t.size + 1;
       let%bind () = add_subject_and_work_count_to_all_subject_titles cache_item in
