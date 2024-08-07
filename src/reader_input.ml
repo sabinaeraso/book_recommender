@@ -93,10 +93,9 @@ let get_user_response (state : Book_recommender.State.t) =
          ^ "\n"
          ^ author_name
          ^ "\n"
-         ^ Float.to_string current_book.heuristic
-         ^ "\n"
          ^ description
          ^ "\n"
+         ^ "Published in: "
          ^ published
          ^ "\n")
   in
@@ -123,10 +122,10 @@ let rec run_recommender (n : float) (state : Book_recommender.State.t) =
     run_recommender (n +. 1.0) state
 ;;
 
-let run () =
+let run ?(path = "cache/") () =
   print_endline "Please input the name of your favorite book: ";
   let%bind origin_book = get_origin_book () in
-  let%bind state = Book_recommender.State.empty_state origin_book in
+  let%bind state = Book_recommender.State.empty_state origin_book path in
   let%bind () = Handle.handle_read_yes 1.0 ~state in
   run_recommender 2.0 state
 ;;
@@ -136,10 +135,13 @@ let run_command =
   Async_command.async
     ~summary:"Run the book recommender!"
     [%map_open
-      let _subject =
-        flag "subject" (optional string) ~doc:"the subject name"
+      let path =
+        flag
+          "path"
+          (optional string)
+          ~doc:"the path to the directory to store the cache"
       in
-      fun () -> run ()]
+      fun () -> match path with None -> run () | Some path -> run ~path ()]
 ;;
 
 let command =

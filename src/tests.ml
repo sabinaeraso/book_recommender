@@ -12,7 +12,7 @@ let%expect_test "Get books from subject: Action & Adventure" =
       ~isbn:None
       ~publish_date:None
   in
-  let%bind state = Book_recommender.State.empty_state dummy in
+  let%bind state = Book_recommender.State.empty_state dummy "cache/" in
   let%bind () =
     Book_recommender.update_to_visit_from_subject
       1.0
@@ -33,7 +33,7 @@ let%expect_test "Get next book from Tooth Fairy subject original queue" =
       ~isbn:None
       ~publish_date:None
   in
-  let%bind state = Book_recommender.State.empty_state dummy in
+  let%bind state = Book_recommender.State.empty_state dummy "cache/" in
   let%bind () =
     Book_recommender.update_to_visit_from_subject
       1.0

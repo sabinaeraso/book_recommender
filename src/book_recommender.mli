@@ -13,7 +13,7 @@ module State : sig
   [@@deriving sexp_of, fields ~getters]
   (* dont expose the type t and only mutate from this file *)
 
-  val empty_state : Book.t -> t Deferred.t
+  val empty_state : Book.t -> string -> t Deferred.t
 end
 
 val update_current_book : state:State.t -> new_book:Book.t -> unit

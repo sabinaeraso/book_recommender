@@ -27,6 +27,7 @@ end
 type t =
   { mutable stored_subjects : Cache_item.Binary_heap.t
   ; mutable size : int
+  ; path : string
   }
 [@@deriving sexp, fields ~getters]
 
@@ -48,6 +49,7 @@ let is_in_cache t subject =
 
 let limit = 1000
 let below_limit t = t.size < limit
+let storage_file_name = "all_subject_titles.txt"
 
 let properly_formatted_subject (subject : string) =
   let banned_symbols =
@@ -74,20 +76,32 @@ let properly_formatted_subject (subject : string) =
     ; "="
     ]
   in
-  List.fold_until
-    banned_symbols
-    ~finish:(fun _b -> true)
-    ~init:true
-    ~f:(fun state word ->
-      let lower_subject = String.lowercase subject in
-      if String.is_substring ~substring:word lower_subject
-         || String.equal word lower_subject
-      then Stop false
-      else Continue state)
+  if String.length subject > 100
+  then false
+  else
+    List.fold_until
+      banned_symbols
+      ~finish:(fun _b -> true)
+      ~init:true
+      ~f:(fun state word ->
+        let lower_subject = String.lowercase subject in
+        if String.is_substring ~substring:word lower_subject
+           || String.equal word lower_subject
+        then Stop false
+        else Continue state)
 ;;
 
-let create_cache () : t Deferred.t =
-  let%bind text = Reader.file_lines "cache/all_subject_titles.txt" in
+let create_cache (path : string) : t Deferred.t =
+  let%bind text =
+    match Sys_unix.is_directory path with
+    | `Yes ->
+      (match Sys_unix.file_exists (path ^ storage_file_name) with
+       | `Yes -> Reader.file_lines (path ^ storage_file_name)
+       | _ ->
+         let%bind () = Writer.save_lines (path ^ storage_file_name) [] in
+         return [])
+    | _ -> failwith "path given is not real or not accessible to program!"
+  in
   let empty_heap =
     Cache_item.Binary_heap.create
       ~dummy:(Cache_item.create ~title:"dummy" ~work_count:0)
@@ -104,28 +118,27 @@ let create_cache () : t Deferred.t =
       Cache_item.Binary_heap.add heap new_cache_item;
       heap)
   in
-  Core.print_endline (Int.to_string (List.length text));
-  return { stored_subjects; size = List.length text }
+  return { stored_subjects; size = List.length text; path }
 ;;
 
 let add_subject_and_work_count_to_all_subject_titles
   (cache_item : Cache_item.t)
+  ~path
   : unit Deferred.t
   =
-  let%bind current_subs = Reader.file_lines "cache/all_subject_titles.txt" in
+  let%bind current_subs = Reader.file_lines (path ^ storage_file_name) in
   let%bind () =
     Writer.save_lines
-      "cache/all_subject_titles.txt"
+      (path ^ storage_file_name)
       (current_subs
        @ [ cache_item.title ^ " " ^ Int.to_string cache_item.work_count ])
   in
   return ()
 ;;
 
-let override_cache_file (heap_of_cache : Cache_item.Binary_heap.t)
+let override_cache_file (heap_of_cache : Cache_item.Binary_heap.t) ~path
   : unit Deferred.t
   =
-  let%bind () = Writer.save_lines "cache/all_subject_titles.txt" [] in
   let subject_map = Hashtbl.create (module String) in
   Cache_item.Binary_heap.iter
     (fun item ->
@@ -136,30 +149,24 @@ let override_cache_file (heap_of_cache : Cache_item.Binary_heap.t)
     List.map assoc_list ~f:(fun (title, work_count) ->
       title ^ " " ^ Int.to_string work_count)
   in
-  let%bind () =
-    Writer.save_lines "cache/all_subject_titles.txt" lines_list
-  in
+  let%bind () = Writer.save_lines (path ^ storage_file_name) lines_list in
   return ()
 ;;
 
 let replace_min_subject t (cache_item : Cache_item.t) =
-  Core.print_endline "entered replacement subjects";
   let current_min = Cache_item.Binary_heap.minimum t.stored_subjects in
   let current_min_title = current_min.title in
   let current_min_count = current_min.work_count in
   if cache_item.work_count > current_min_count
   then (
     let _ = Cache_item.Binary_heap.pop_minimum t.stored_subjects in
-    Core.print_s [%sexp (current_min : Cache_item.t)];
-    Core.print_endline "replaced with";
-    Core.print_s [%sexp (cache_item : Cache_item.t)];
     Sys_unix.remove ("cache/" ^ current_min_title ^ ".txt");
-    let%bind () = override_cache_file t.stored_subjects in
+    let%bind () = override_cache_file t.stored_subjects ~path:t.path in
     return (t.size <- t.size - 1))
   else return ()
 ;;
 
-let write_to_cache t raw_subject_page formatted_subject =
+let write_to_cache t raw_subject_page formatted_subject ~path =
   let cache_item =
     Cache_item.create
       ~title:formatted_subject
@@ -183,13 +190,15 @@ let write_to_cache t raw_subject_page formatted_subject =
     | Ok () ->
       let%bind () =
         Writer.save
-          ("cache/" ^ formatted_subject ^ ".txt")
+          (path ^ formatted_subject ^ ".txt")
           ~contents:raw_subject_page
       in
       Cache_item.Binary_heap.add t.stored_subjects cache_item;
       t.size <- t.size + 1;
       let%bind () =
-        add_subject_and_work_count_to_all_subject_titles cache_item
+        add_subject_and_work_count_to_all_subject_titles
+          cache_item
+          ~path:t.path
       in
       return ())
   else return ()
@@ -203,7 +212,7 @@ let get_from_cache t subject =
   if is_in_cache t formatted_subject
   then (
     let%bind text =
-      Reader.file_contents ("cache/" ^ formatted_subject ^ ".txt")
+      Reader.file_contents (t.path ^ formatted_subject ^ ".txt")
     in
     return text)
   else (
@@ -212,7 +221,9 @@ let get_from_cache t subject =
     in
     if properly_formatted_subject formatted_subject
     then (
-      let%bind () = write_to_cache t raw_subject_page formatted_subject in
+      let%bind () =
+        write_to_cache t raw_subject_page formatted_subject ~path:t.path
+      in
       return raw_subject_page)
     else return raw_subject_page)
 ;;
@@ -224,7 +235,7 @@ let write_file =
     [%map_open
       let subject = flag "subject" (required string) ~doc:"Subject" in
       fun () ->
-        let%bind.Deferred sub = create_cache () in
+        let%bind.Deferred sub = create_cache "cache/" in
         let%bind.Deferred text = get_from_cache sub subject in
         print_s [%sexp (text : string)];
         Deferred.return ()]
