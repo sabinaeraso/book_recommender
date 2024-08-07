@@ -24,10 +24,6 @@ $ opam install async_interactive
 $ opam install fzf
 ```
 
-```
-$ sudo apt install fzf
-```
-
 After downloading the program and depedencies, users should navigate to the book_recommender directory.
 
 Users should use the below command to start the program.
