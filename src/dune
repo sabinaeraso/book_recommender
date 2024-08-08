@@ -8,11 +8,12 @@
   core
   curl
   file_path
+  fzf
+  graphics
   uri
   cohttp
   cohttp-lwt-unix
   yojson
-  fzf
   async_interactive)
  (preprocess
   (pps ppx_jane ppx_inline_test ppx_enumerate)))
