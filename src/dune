@@ -10,9 +10,7 @@
   file_path
   fzf
   graphics
-  uri
-  cohttp
-  cohttp-lwt-unix
+  camlimages
   yojson
   async_interactive)
  (preprocess
