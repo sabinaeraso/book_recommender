@@ -124,7 +124,7 @@ let rec run_recommender (n : float) (state : Book_recommender.State.t) =
 
 let run ?(path = "cache/") () =
   print_endline "Please input the name of your favorite book: ";
-  Run.run ();
+  Graphics_run.run ();
   let%bind origin_book = get_origin_book () in
   let%bind state = Book_recommender.State.empty_state origin_book path in
   let%bind () = Handle.handle_read_yes 1.0 ~state in
