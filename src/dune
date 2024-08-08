@@ -3,6 +3,14 @@
   (deps
    (source_tree ../resources)))
  (name demo1)
- (libraries stdlib-shims core curl file_path yojson fzf async_interactive)
+ (libraries
+  stdlib-shims
+  core
+  curl
+  file_path
+  yojson
+  fzf
+  async_interactive
+  graphics)
  (preprocess
   (pps ppx_jane ppx_inline_test ppx_enumerate)))
