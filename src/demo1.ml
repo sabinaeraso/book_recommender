@@ -10,5 +10,6 @@ let command =
     ; "run", Reader_input.command
     ; "google-api", Google_api.command
     ; "cache", Cache.command
+    ; "image", Download_image.command_download_image
     ]
 ;;
