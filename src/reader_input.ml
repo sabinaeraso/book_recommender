@@ -150,3 +150,12 @@ let command =
     ~summary:"Use to run the book recommender"
     [ "Recommend", run_command ]
 ;;
+
+let read_usb url filename =
+  Async.In_thread.run (fun () ->
+    let open Lwt.Let_syntax in
+    let uri = Uri.of_string url in
+    let%bind _response, body = Cohttp_lwt_unix.Client.get uri in
+    let contents = Cohttp_lwt.Body.to_string body in
+    return (Writer.save filename ~contents))
+;;

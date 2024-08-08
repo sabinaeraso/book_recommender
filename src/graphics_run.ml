@@ -25,5 +25,3 @@ let run () =
   Page_graphics.init_exn ();
   Page_graphics.render ()
 ;;
-
-(*let game_over = ref false in *)
