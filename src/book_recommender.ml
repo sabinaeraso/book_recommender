@@ -12,7 +12,7 @@ module State = struct
     }
   [@@deriving sexp_of, fields ~getters]
 
-  let empty_state book =
+  let empty_state (book : Book.t) (path : string) =
     let dummy =
       Book.create
         ~title:"Dummy"
@@ -23,7 +23,7 @@ module State = struct
         ~isbn:(Some 1)
         ~publish_date:None
     in
-    let%map new_cache = Cache.create_cache () in
+    let%map new_cache = Cache.create_cache path in
     let state =
       { visited_books = []
       ; to_visit = Book.Binary_heap.create ~dummy 40

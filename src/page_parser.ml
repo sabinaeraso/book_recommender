@@ -315,7 +315,6 @@ module Search_page = struct
                         let formatted_lang =
                           format_field string_first_lang
                         in
-                        print_endline formatted_lang;
                         formatted_lang
                       | _ -> failwith "no language")
                    | _ -> failwith "no inner doc")
