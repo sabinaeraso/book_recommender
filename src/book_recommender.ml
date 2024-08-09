@@ -84,7 +84,7 @@ let update_to_visit_from_subject
        (List.exists state.visited_subjects ~f:(fun s ->
           String.equal s (String.lowercase subject)))
   then (
-    print_endline subject;
+    print_endline ("Checking books in: " ^ subject);
     state.visited_subjects
     <- List.append state.visited_subjects [ String.lowercase subject ];
     let%bind books =
