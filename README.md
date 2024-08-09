@@ -17,19 +17,21 @@ The program utilizes Open Library and Google Books RestAPIs, along with the Ocam
 To download the dependencies users should run the below commands.
 
 ```
-$ opam install async_interactive
+$ opam install async_interactive fzf
 ```
 
 ```
-$ opam install fzf
+$ sudo apt install fzf # to install the fzf binary also
 ```
 
-After downloading the program and depedencies, users should navigate to the book_recommender directory.
+Users must also create / specify a directory in which they want the cache to be stored. The program will take the path to this directory as an argument and the program will not run in the path is inaccurate.
 
-Users should use the below command to start the program.
+After downloading the depedencies and creating a directory for the cache, users should navigate to the book_recommender directory.
+
+Users should use the below command to start the program!
 
 ```
-$ dune exec ./bin/main.exe -- run recommend
+$ dune exec ./bin/main.exe -- run recommend -path <path to the cache>
 ```
 
 # Members
