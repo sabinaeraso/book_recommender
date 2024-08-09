@@ -2,10 +2,10 @@
 
 A Book Recommendation Software
 
-BookMatch is a book recommendation app run through command line which presents the user a tinder-style approach to book recommendations.
-Utilizing the OpenLibary and Google Books RestAPIs, Book Match implements a similarity algorithm which finds books similar to the user's favorite book.
+BookMatch is a book recommendation app run through command line which presents the user with one book recommendation at a time.
+Utilizing the OpenLibary and Google Books RestAPIs, Book Match implements a similarity algorithm which finds book recommendations based on the user's favorite book and opinions on subsequent recommendations.
 
-The user starts with inputting their favorite book and then has the options to choose interested, uninterested or read on the following recommendations, 
+The user starts with inputting their favorite book and then has the option to choose "interested", "uninterested", "read and liked", or "read and did not enjoy" on the following recommendations, 
 allowing the program to learn more about the user's interests to make more accurate recommendations.
 
 BookMatch exists as a fun and simplistic way for a user to recieve book recommendations while doing minimal work searching for books themselves. It is a fun project intended to help avid readers and new readers alike. 
