@@ -73,6 +73,13 @@ let get_author_name (current_book : Book.t) =
      | Error _ -> "No Author Found")
 ;;
 
+let format_description (description : string) : string =
+  let string_list = String.split_on_chars ~on:[ ' ' ] description in
+  List.folding_map string_list ~init:0 ~f:(fun index elt ->
+    if index % 20 = 0 then index + 1, "\n" ^ elt else index + 1, elt)
+  |> String.concat ~sep:" "
+;;
+
 let get_user_response (state : Book_recommender.State.t) =
   let current_book = state.current_book in
   let current_title = current_book.title in
@@ -93,8 +100,8 @@ let get_user_response (state : Book_recommender.State.t) =
          ^ "\n"
          ^ author_name
          ^ "\n"
-         ^ description
-         ^ "\n"
+         ^ format_description description
+         ^ "\n\n"
          ^ "Published in: "
          ^ published
          ^ "\n")
