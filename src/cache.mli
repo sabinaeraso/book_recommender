@@ -24,11 +24,6 @@ type t =
    all_subject_titles.txt *)
 val create_cache : string -> t Deferred.t
 
-(* Fetches a subject from Open Library, adds its raw string page to the cache
-   directory as a .txt file, and adds it's name to all_subject_titles.txt and
-   updates the current cache instance*)
-(* val write_to_cache : t -> string -> string -> unit Deferred.t *)
-
 (* retrieves a subject's page from the cache and returns Some string if it's
    found. This will also add the subject to the cache calling write_to_cache
    if the subject is valid and not already there. If the subject is invalid

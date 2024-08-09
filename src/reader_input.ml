@@ -124,7 +124,7 @@ let rec run_recommender (n : float) (state : Book_recommender.State.t) =
 
 let run ?(path = "cache/") () =
   print_endline "Please input the name of your favorite book: ";
-  Graphics_run.run ();
+  (*Graphics_run.run (); *)
   let%bind origin_book = get_origin_book () in
   let%bind state = Book_recommender.State.empty_state origin_book path in
   let%bind () = Handle.handle_read_yes 1.0 ~state in
@@ -149,13 +149,4 @@ let command =
   Command.group
     ~summary:"Use to run the book recommender"
     [ "Recommend", run_command ]
-;;
-
-let read_usb url filename =
-  Async.In_thread.run (fun () ->
-    let open Lwt.Let_syntax in
-    let uri = Uri.of_string url in
-    let%bind _response, body = Cohttp_lwt_unix.Client.get uri in
-    let contents = Cohttp_lwt.Body.to_string body in
-    return (Writer.save filename ~contents))
 ;;

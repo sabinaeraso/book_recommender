@@ -10,7 +10,6 @@
   file_path
   fzf
   graphics
-  camlimages
   yojson
   async_interactive)
  (preprocess
