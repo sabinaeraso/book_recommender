@@ -12,7 +12,7 @@ BookMatch exists as a fun and simplistic way for a user to recieve book recommen
 
 The program utilizes Open Library and Google Books RestAPIs, along with the Ocaml libraries Fzf, Yojson, Async_interactive. 
 
-# How to Run Project
+# How to Setup / Run Project
 
 To download the dependencies users should run the below commands.
 
@@ -24,7 +24,9 @@ $ opam install async_interactive fzf
 $ sudo apt install fzf # to install the fzf binary also
 ```
 
-Users must also create / specify a directory in which they want the cache to be stored. The program will take the path to this directory as an argument and the program will not run in the path is inaccurate.
+Users must also create / specify a directory in which they want the cache to be stored. The program will take the path from the directory it is being run to this directory as an optional argument and the program will not run in the path is inaccurate. If this optional argument is not passed the program will assume there is a "cache/" directory within the directory the program is being run
+
+**** Running ****
 
 After downloading the depedencies and creating a directory for the cache, users should navigate to the book_recommender directory.
 
