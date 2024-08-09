@@ -17,11 +17,11 @@ The program utilizes Open Library and Google Books RestAPIs, along with the Ocam
 To download the dependencies users should run the below commands.
 
 ```
-$ opam install async_interactive
+$ opam install async_interactive fzf
 ```
 
 ```
-$ opam install fzf
+$ sudo apt install fzf # to install the fzf binary also
 ```
 
 After downloading the program and depedencies, users should navigate to the book_recommender directory.
