@@ -14,27 +14,8 @@ let response_options =
        Message.all)
 ;;
 
-let get_origin_book_input () =
-  let%bind book_name =
-    Async_interactive.ask_dispatch_gen
-      ~f:(fun s -> Ok s)
-      "What is the book you want to start with?  "
-  in
-  return book_name
-;;
-
-let rec get_origin_book () =
-  let%bind name_to_search = get_origin_book_input () in
-  let valid =
-    Or_error.try_with (fun () ->
-      Open_library.Fetch_and_parse.get_book_from_title name_to_search)
-  in
-  match valid with
-  | Ok book -> return book
-  | Error _ ->
-    print_endline
-      "Could not find book of that title please try different title! \n";
-    get_origin_book ()
+let yes_or_no_options =
+  Fzf.Pick_from.assoc (List.zip_exn [ "Yes"; "No" ] [ true; false ])
 ;;
 
 let get_valid_description (current_book : Book.t) =
@@ -78,6 +59,47 @@ let format_description (description : string) : string =
   List.folding_map string_list ~init:0 ~f:(fun index elt ->
     if index % 20 = 0 then index + 1, "\n" ^ elt else index + 1, elt)
   |> String.concat ~sep:" "
+;;
+
+let get_origin_book_input () =
+  let%bind book_name =
+    Async_interactive.ask_dispatch_gen
+      ~f:(fun s -> Ok s)
+      "What is the book you want to start with?  "
+  in
+  return book_name
+;;
+
+let rec get_origin_book () =
+  let%bind name_to_search = get_origin_book_input () in
+  let valid =
+    Or_error.try_with (fun () ->
+      Open_library.Fetch_and_parse.get_book_from_title name_to_search)
+  in
+  match valid with
+  | Ok book ->
+    let desc = get_valid_description book in
+    let author = get_author_name book in
+    let%bind response =
+      pick_one
+        yes_or_no_options
+        ~prompt_at_top:()
+        ~header:
+          ("Is this the correct book? \n"
+           ^ book.title
+           ^ "\n"
+           ^ author
+           ^ "\n"
+           ^ format_description desc
+           ^ "\n")
+    in
+    (match ok_exn response with
+     | Some true -> return book
+     | _ -> get_origin_book ())
+  | Error _ ->
+    print_endline
+      "Could not find book of that title please try different title! \n";
+    get_origin_book ()
 ;;
 
 let get_user_response (state : Book_recommender.State.t) =
