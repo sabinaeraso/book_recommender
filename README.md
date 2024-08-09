@@ -14,6 +14,8 @@ The program utilizes Open Library and Google Books RestAPIs, along with the Ocam
 
 # How to Setup / Run Project
 
+## Setup
+
 To download the dependencies users should run the below commands.
 
 ```
