@@ -18,7 +18,6 @@ let download_image url (book_title : string) : unit Deferred.t =
 ;;
 
 (*Ivar*)
-
 let command_download_image =
   let open Command.Let_syntax in
   Async_command.async
